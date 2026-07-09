@@ -2,10 +2,13 @@
 
 Short guide for humans moving this handoff package into another project or Cursor environment.
 
+**Canonical repository:** [github.com/VoltikPRO/revit-vp-hub-packaging-handoff](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff)
+
 ## What this package contains
 
 ```text
-revit-vp-hub-packaging/
+revit-vp-hub-packaging-handoff/
+  README.md       # Repo overview
   SKILL.md        # Agent instructions (main)
   reference.md    # Detailed packaging rules
   ADOPTION.md     # This file
@@ -13,22 +16,34 @@ revit-vp-hub-packaging/
 
 No PowerShell scripts are included. The agent adapts packaging scripts into the target project using `SKILL.md` and optional reference implementation (`LP/packaging/`).
 
-## Install the skill in Cursor
+## Get the repo
 
-Choose one location:
+### Option A — git clone (recommended)
+
+```powershell
+git clone https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff.git
+```
+
+Place it as a sibling of your plugin repo when possible:
+
+```text
+Plugin/
+├── MyRevitPlugin/
+└── revit-vp-hub-packaging-handoff/
+```
+
+### Option B — copy into Cursor skills
 
 | Location | Path | Scope |
 |----------|------|-------|
-| Personal (recommended) | `~/.cursor/skills/revit-vp-hub-packaging/` | All your projects |
-| Project | `<target-repo>/.cursor/skills/revit-vp-hub-packaging/` | Shared with repo |
+| Personal (recommended) | `~/.cursor/skills/revit-vp-hub-packaging-handoff/` | All your projects |
+| Project | `<target-repo>/.cursor/skills/revit-vp-hub-packaging-handoff/` | Shared with repo |
 
-### Steps
+Clone or copy the repo folder to the chosen path. Ensure `SKILL.md` with YAML frontmatter is present.
 
-1. Copy the entire `revit-vp-hub-packaging/` folder to the chosen path
-2. Ensure the folder contains `SKILL.md` with YAML frontmatter
-3. In Cursor, invoke explicitly: *"Use revit-vp-hub-packaging skill to set up VP-Hub packaging"*
+Invoke in Cursor: *"Use revit-vp-hub-packaging-handoff skill to set up VP-Hub packaging"*
 
-The skill uses `disable-model-invocation: true` by default in Cursor skills — name it in the prompt when packaging.
+The skill uses `disable-model-invocation: true` — name it explicitly in the prompt when packaging.
 
 ## First adoption in a new plugin project
 
@@ -47,18 +62,18 @@ Generic projects must **not** depend on `LicensingSystem` repo.
 
 ## Handoff between teams
 
-To give another team everything they need:
+Share the repository URL:
 
-1. Copy `revit-vp-hub-packaging/` folder (this package)
-2. Optionally point them to `LP/packaging/` as a worked example (read-only)
-3. Provide `revit-api/` DLLs separately (not redistributable via git in most setups)
+```text
+https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff
+```
+
+Optionally point them to `LP/packaging/` as a worked example. Provide `revit-api/` DLLs separately (not redistributable via git in most setups).
 
 ## Updating the skill
 
-When packaging lessons are learned (e.g. new Revit year, new validation rule):
-
-1. Update `SKILL.md` (workflow / checklist)
-2. Put detailed rules in `reference.md`
-3. Re-copy to `~/.cursor/skills/` or project `.cursor/skills/`
+1. Edit `SKILL.md` or `reference.md` in this repo
+2. Commit and push to `main`
+3. Pull or re-copy to `~/.cursor/skills/` on other machines
 
 Keep `SKILL.md` under 500 lines; use progressive disclosure via `reference.md`.

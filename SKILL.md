@@ -1,5 +1,5 @@
 ---
-name: revit-vp-hub-packaging
+name: revit-vp-hub-packaging-handoff
 description: >-
   Builds and validates Autodesk Revit ApplicationPlugins VP-Hub bundles
   (multi-year package.zip, PackageContents.xml, deploy folders) without
