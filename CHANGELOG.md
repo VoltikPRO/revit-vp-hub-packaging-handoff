@@ -1,5 +1,11 @@
 ﻿# Changelog
 
+## 1.0.1 — 2026-07-09
+
+- License Probe reference add-in: full integration demo (`EnsureLicensed`, net48 `AssemblyResolver`, command gating).
+- Working `packaging/` scripts and `plugin.manifest.json` in kit root for probe smoke builds.
+- Integration checklist note for reference implementation.
+
 ## 1.0.0 — 2026-07-09
 
 - Initial **VP-Hub Revit Publisher Kit** (packaging + licensing integration).
