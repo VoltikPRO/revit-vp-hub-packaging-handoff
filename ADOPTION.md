@@ -1,79 +1,79 @@
-# Adopting the Revit VP-Hub Packaging Skill
+# Adopting the VP-Hub Revit Publisher Kit
 
-Short guide for humans moving this handoff package into another project or Cursor environment.
+Guide for plugin teams and Cursor users.
 
-**Canonical repository:** [github.com/VoltikPRO/revit-vp-hub-packaging-handoff](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff)
+**Repository:** [github.com/VoltikPRO/revit-vp-hub-packaging-handoff](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff)
 
 ## What this package contains
 
 ```text
 revit-vp-hub-packaging-handoff/
-  README.md       # Repo overview
-  SKILL.md        # Agent instructions (main)
-  reference.md    # Detailed packaging rules
-  ADOPTION.md     # This file
+  .cursor/skills/          # vp-hub-revit-integration, licensing, packaging
+  .cursor/rules/           # vp-hub-revit-licensing.mdc
+  libs/                    # vendored LicensingSystem SDK
+  reference/LicenseProbe/  # read-only sample
+  templates/               # C#, packaging PS1, manifest JSON
+  docs/                    # AGENTS.md, architecture copies
+  scripts/                 # adopt, build ZIP, maintainer sync
 ```
 
-No PowerShell scripts are included. The agent adapts packaging scripts into the target project using `SKILL.md` and optional reference implementation (`LP/packaging/`).
+## Option A — adopt script (recommended)
 
-## Get the repo
-
-### Option A — git clone (recommended)
+From your plugin repo:
 
 ```powershell
-git clone https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff.git
+powershell -NoProfile -ExecutionPolicy Bypass -File path\to\revit-vp-hub-packaging-handoff\scripts\adopt-into-project.ps1 -TargetRepo .
 ```
 
-Place it as a sibling of your plugin repo when possible:
+- **Full** (default): skills + rules + `libs/` + `packaging/` + `docs/templates/`
+- **SkillsOnly**: `-Level SkillsOnly`
+
+Then edit `packaging/plugin.manifest.json` and portal pinning constants.
+
+## Option B — personal Cursor skills
+
+Copy skill folders to:
 
 ```text
-Plugin/
-├── MyRevitPlugin/
-└── revit-vp-hub-packaging-handoff/
+~/.cursor/skills/vp-hub-revit-integration/
+~/.cursor/skills/revit-add-in-licensing/
+~/.cursor/skills/revit-vp-hub-packaging/
 ```
 
-### Option B — copy into Cursor skills
+Copy rule: `~/.cursor/rules/vp-hub-revit-licensing.mdc`
 
-| Location | Path | Scope |
-|----------|------|-------|
-| Personal (recommended) | `~/.cursor/skills/revit-vp-hub-packaging-handoff/` | All your projects |
-| Project | `<target-repo>/.cursor/skills/revit-vp-hub-packaging-handoff/` | Shared with repo |
+Invoke: *"Use vp-hub-revit-integration skill to integrate VP-Hub licensing."*
 
-Clone or copy the repo folder to the chosen path. Ensure `SKILL.md` with YAML frontmatter is present.
+## Option C — project-local skills
 
-Invoke in Cursor: *"Use revit-vp-hub-packaging-handoff skill to set up VP-Hub packaging"*
+Copy `.cursor/skills/*` and `.cursor/rules/*` into **your plugin repo** `.cursor/` and commit for the team.
 
-The skill uses `disable-model-invocation: true` — name it explicitly in the prompt when packaging.
+## Option D — release ZIP
 
-## First adoption in a new plugin project
+Download or build `VP-Hub-RevitPublisherKit-<version>.zip`, unzip, then run `adopt-into-project.ps1` pointing at your repo.
 
-1. **Create manifest** — agent creates `packaging/plugin.manifest.json` with your product names
-2. **Dev build (one year)** — start with a single year (e.g. 2024) using `-AllowPartialYears`
-3. **Populate requiredDlls** — after first build, record DLL list from `deploy/<year>/`
-4. **Expand to all years** — add `revit-api/` folders or Revit installs for remaining years
-5. **Production build** — full build without `-AllowPartialYears`
-6. **Smoke test** — Revit loads add-in from ApplicationPlugins bundle
+## First-time publisher workflow
 
-## Reference implementation
+1. Complete [`ONBOARDING.md`](ONBOARDING.md) (portal product + pinning)
+2. Run adopt script
+3. Cursor + **vp-hub-revit-integration** (phases A–E)
+4. Production `package.zip` per [`RELEASE.md`](RELEASE.md)
+5. [`SMOKE-TESTS.md`](SMOKE-TESTS.md)
 
-If the **LP** repo is available as a sibling (`Plugin/LP/`), the agent may read `LP/packaging/` for concrete script patterns. LP is not required — `reference.md` is sufficient.
+## SDK: libs vs NuGet
 
-Generic projects must **not** depend on `LicensingSystem` repo.
+- **Default:** `libs/` project references (copied by Full adopt)
+- **Alternative:** [`docs/nuget.md`](docs/nuget.md) when your operator publishes packages to a feed
 
-## Handoff between teams
+## Updating the kit
 
-Share the repository URL:
-
-```text
-https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff
+```powershell
+git -C revit-vp-hub-packaging-handoff pull
+# Re-run adopt (skills overwrite; libs/ skipped if already present — merge manually)
 ```
 
-Optionally point them to `LP/packaging/` as a worked example. Provide `revit-api/` DLLs separately (not redistributable via git in most setups).
+Maintainers: [`MAINTAINERS.md`](MAINTAINERS.md)
 
-## Updating the skill
+## Legacy root SKILL.md
 
-1. Edit `SKILL.md` or `reference.md` in this repo
-2. Commit and push to `main`
-3. Pull or re-copy to `~/.cursor/skills/` on other machines
-
-Keep `SKILL.md` under 500 lines; use progressive disclosure via `reference.md`.
+The file [`SKILL.md`](SKILL.md) at repo root redirects to `.cursor/skills/revit-vp-hub-packaging/` for backward compatibility with older clone-to-`~/.cursor/skills/` instructions.

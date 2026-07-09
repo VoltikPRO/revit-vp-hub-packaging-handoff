@@ -1,0 +1,43 @@
+---
+description: VP-Hub / LicensingSystem Revit add-in policy — IPC, proof verification, packaging. Apply when editing Revit plugin code for VP-Hub distribution.
+globs:
+  - "**/*.cs"
+  - "**/*.csproj"
+  - "**/*.addin"
+  - "packaging/**"
+alwaysApply: false
+---
+
+# VP-Hub Revit licensing (always-on policy)
+
+Authoritative detail: [`docs/AGENTS.md`](../../docs/AGENTS.md).
+
+## Non-negotiable
+
+- Revit add-in **must not** call the cloud Worker/API directly.
+- **No** access tokens, refresh tokens, secrets, or private grant-signing keys in the add-in.
+- Talk to the **local Windows agent** only via **named-pipe IPC** (`NamedPipeAgentClient.CanRunAsync`).
+- **Never** trust `Allowed == true` without **ES256 proof verification** (`RevitLicenseProofVerifier`).
+- Pin publisher: `ExpectedPublisherId`, `ExpectedKid`, `ExpectedPublisherPublicKeyPem`, optional `ExpectedAudienceServerId`; bind `ProductCode`.
+- Enforce freshness: exact `RequestNonce`; timestamp echo within skew.
+- On IPC failure, `Allowed == false`, or verification failure: **deny** — no fallback allow.
+- Cache verified OK in memory (30–120 seconds typical).
+
+## TFM / IPC matrix
+
+| Revit years | TFM | IPC package |
+|-------------|-----|-------------|
+| 2023–2024 | net48 | `LicensingSystem.Agent.Ipc.Revit` |
+| 2025+ | net8.0-windows | `LicensingSystem.Agent.Ipc` |
+
+## Packaging (net48)
+
+- `Contents/<year>/` must be **self-contained** (all runtime `*.dll` from build output).
+- Minimum for licensed products: `System.Text.Json.dll`, `LicensingSystem.Agent.Ipc.Revit.dll`, `LicensingSystem.Contracts.dll`, `LicensingSystem.Revit.Licensing.dll`.
+- Register `PluginAssemblyResolver` in `OnStartup` before licensing/IPC on net48.
+
+## Skills
+
+- Orchestrator: `.cursor/skills/vp-hub-revit-integration/`
+- Licensing: `.cursor/skills/revit-add-in-licensing/`
+- Packaging: `.cursor/skills/revit-vp-hub-packaging/`

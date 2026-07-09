@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>My Product</Name>
+    <Assembly>.\MyProduct.dll</Assembly>
+    <ClientId>00000000-0000-0000-0000-000000000001</ClientId>
+    <FullClassName>MyProduct.App.App</FullClassName>
+    <VendorId>MYC</VendorId>
+    <VendorDescription>MyCompany</VendorDescription>
+  </AddIn>
+</RevitAddIns>

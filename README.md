@@ -1,39 +1,73 @@
-# revit-vp-hub-packaging-handoff
+# VP-Hub Revit Publisher Kit
 
-Portable handoff for building valid Revit VP-Hub ApplicationPlugins bundles (`package.zip`) **without** LicensingSystem access.
+Public handoff package for **Revit plugin publishers** integrating with [VP-Hub / LicensingSystem](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff). Includes Cursor Agent skills, vendored SDK (`libs/`), packaging templates, and documentation — **no access to the LicensingSystem monorepo required**.
 
-Derived from the [LP](https://github.com/VoltikPRO/lp-revit-plugin) packaging workflow.
+Canonical repo: [github.com/VoltikPRO/revit-vp-hub-packaging-handoff](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff)
 
-## Contents
+## What you get
 
-| File | Purpose |
-|------|---------|
-| [SKILL.md](SKILL.md) | Cursor Agent Skill — main packaging workflow |
-| [reference.md](reference.md) | Detailed rules: scripts, `PackageContents.xml`, DLL validation, smoke |
-| [ADOPTION.md](ADOPTION.md) | How to install the skill in another project |
+| Area | Contents |
+|------|----------|
+| **AI skills** | `.cursor/skills/vp-hub-revit-integration` (start here), `revit-add-in-licensing`, `revit-vp-hub-packaging` |
+| **Policy** | `.cursor/rules/vp-hub-revit-licensing.mdc` |
+| **SDK** | `libs/` — Revit.Licensing, Contracts, Agent.Ipc* (or NuGet — [`docs/nuget.md`](docs/nuget.md)) |
+| **Reference** | `reference/LicenseProbe/` — read-only patterns |
+| **Templates** | C# pinning/gate, `.addin`, `packaging/*.ps1` |
+| **Docs** | [`docs/AGENTS.md`](docs/AGENTS.md), onboarding, bundle packaging, brand book |
 
-## Clone (canonical)
+## Quick start
+
+### 1. Clone
 
 ```powershell
 git clone https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff.git
 ```
 
-Recommended layout next to a plugin repo:
+### 2. Adopt into your plugin repo (recommended)
 
-```text
-Plugin/
-├── LP/                              # reference implementation (optional)
-└── revit-vp-hub-packaging-handoff/  # this repo
+```powershell
+cd C:\dev\MyRevitPlugin
+..\revit-vp-hub-packaging-handoff\scripts\adopt-into-project.ps1 -TargetRepo .
 ```
 
-## Cursor
+### 3. Cursor prompt
 
-Install as a personal skill:
+> Integrate this Revit add-in with VP-Hub using **vp-hub-revit-integration** skill. Follow phases A–E. Gate every command. Do not call the cloud API from Revit.
 
-```text
-~/.cursor/skills/revit-vp-hub-packaging-handoff/
+### 4. Human checklists
+
+- Portal setup: [`ONBOARDING.md`](ONBOARDING.md)
+- Release: [`RELEASE.md`](RELEASE.md)
+- Smoke: [`SMOKE-TESTS.md`](SMOKE-TESTS.md)
+- Done criteria: [`INTEGRATION-CHECKLIST.md`](INTEGRATION-CHECKLIST.md)
+
+## Adoption levels
+
+| Level | Command | Copies |
+|-------|---------|--------|
+| **Full** | `adopt-into-project.ps1 -TargetRepo .` | skills, rules, `libs/`, `packaging/`, templates |
+| **Skills only** | `... -Level SkillsOnly` | `.cursor/skills/*`, `.cursor/rules/*` |
+
+Details: [`ADOPTION.md`](ADOPTION.md)
+
+## Packaging only
+
+If you only need `package.zip` / `.bundle` layout without licensing code, use skill **revit-vp-hub-packaging** (explicit invoke — `disable-model-invocation: true`).
+
+## Releases
+
+Download **VP-Hub-RevitPublisherKit-&lt;version&gt;.zip** from [GitHub Releases](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff/releases) or build locally:
+
+```powershell
+powershell -File scripts/build-publisher-kit-zip.ps1 -Version 1.0.0
 ```
 
-Then invoke: *"Use revit-vp-hub-packaging-handoff skill to set up VP-Hub packaging"*
+Platform operators may upload the ZIP to Admin → Publisher kit.
 
-See [ADOPTION.md](ADOPTION.md) for details.
+## Maintainers
+
+See [`MAINTAINERS.md`](MAINTAINERS.md). SDK refresh is **read-only** from sibling `LicensingSystem` — that monorepo is not modified by this kit.
+
+## Support
+
+Operator fills [`SUPPORT.md`](SUPPORT.md) (agent min version, portal URL, NuGet feed).

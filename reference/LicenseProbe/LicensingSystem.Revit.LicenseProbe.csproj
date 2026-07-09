@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>LicensingSystem.Revit.LicenseProbe</RootNamespace>
+    <AssemblyName>LicensingSystem.Revit.LicenseProbe</AssemblyName>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>1.0.10</Version>
+
+    <!--
+      Revit API references are local-only. If Revit isn't installed (CI/dev box),
+      we still want the repo to build/test successfully.
+      Revit 2024 = .NET Framework 4.8 â†’ build net48 + LicensingSystem.Agent.Ipc.Revit.
+      Revit 2025+ = .NET 8 â†’ build net8.0-windows + full LicensingSystem.Agent.Ipc.
+    -->
+    <HasRevitApi Condition="Exists('$(RevitInstallPath)\RevitAPI.dll') and Exists('$(RevitInstallPath)\RevitAPIUI.dll')">true</HasRevitApi>
+    <HasRevitApi Condition="'$(HasRevitApi)' == ''">false</HasRevitApi>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(HasRevitApi)' == 'true'">
+    <Reference Include="RevitAPI">
+      <HintPath>$(RevitInstallPath)\RevitAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>$(RevitInstallPath)\RevitAPIUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(HasRevitApi)' != 'true'">
+    <Compile Remove="LicenseProbeApplication.cs" />
+    <Compile Remove="LicenseProbeCommand.cs" />
+    <Compile Remove="LicenseProbeAboutCommand.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\libs\LicensingSystem.Contracts\LicensingSystem.Contracts.csproj" />
+    <ProjectReference Include="..\..\libs\LicensingSystem.Revit.Licensing\LicensingSystem.Revit.Licensing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <ProjectReference Include="..\..\libs\LicensingSystem.Agent.Ipc.Revit\LicensingSystem.Agent.Ipc.Revit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <ProjectReference Include="..\..\libs\LicensingSystem.Agent.Ipc\LicensingSystem.Agent.Ipc.csproj" />
+  </ItemGroup>
+
+</Project>

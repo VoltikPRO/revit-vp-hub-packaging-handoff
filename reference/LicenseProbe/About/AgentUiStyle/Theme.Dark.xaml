@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Copied from agent UI: Secure Precision UI tokens (Dark). -->
+    <SolidColorBrush x:Key="Brush.Bg" Color="#FF0B1220" />
+    <SolidColorBrush x:Key="Brush.Surface" Color="#FF0F172A" />
+    <SolidColorBrush x:Key="Brush.SurfaceAlt" Color="#FF111C33" />
+    <SolidColorBrush x:Key="Brush.Border" Color="#FF1F2A44" />
+
+    <SolidColorBrush x:Key="Brush.Fg" Color="#FFE5E7EB" />
+    <SolidColorBrush x:Key="Brush.FgSecondary" Color="#FFA3AAB8" />
+    <SolidColorBrush x:Key="Brush.Muted" Color="#FF6B7280" />
+
+    <SolidColorBrush x:Key="Brush.Accent" Color="#FF1D4ED8" />
+    <SolidColorBrush x:Key="Brush.AccentHover" Color="#FF1E40AF" />
+    <SolidColorBrush x:Key="Brush.AccentPressed" Color="#FF1E3A8A" />
+
+    <SolidColorBrush x:Key="Brush.AccentSoft" Color="#262D4ED8" />
+    <SolidColorBrush x:Key="Brush.AccentTint" Color="#262D4ED8" />
+
+    <SolidColorBrush x:Key="Brush.Success" Color="#FF22C55E" />
+    <SolidColorBrush x:Key="Brush.Warning" Color="#FFFBBF24" />
+    <SolidColorBrush x:Key="Brush.Error" Color="#FFEF4444" />
+    <SolidColorBrush x:Key="Brush.Info" Color="#FF38BDF8" />
+
+    <CornerRadius x:Key="Radius.Sm">4</CornerRadius>
+
+</ResourceDictionary>
+

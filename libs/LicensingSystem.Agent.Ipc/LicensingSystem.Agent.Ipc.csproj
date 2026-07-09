@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>LicensingSystem.Agent.Ipc</RootNamespace>
+    <AssemblyName>LicensingSystem.Agent.Ipc</AssemblyName>
+    <Description>Named-pipe IPC client for Revit 2025+ (.NET 8). Vendored publisher kit slice.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LicensingSystem.Contracts\LicensingSystem.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Pipes.AccessControl" Version="6.0.0-preview.5.21301.5" />
+  </ItemGroup>
+
+</Project>

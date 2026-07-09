@@ -1,0 +1,18 @@
+# Build output
+**/bin/
+**/obj/
+dist/
+
+# Secrets
+*.pem
+.env
+.env.*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vs/
+
+# Plugin deploy artifacts (when testing packaging in-kit)
+deploy/
+artifacts/

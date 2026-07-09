@@ -1,0 +1,30 @@
+{
+  "productCode": "revit.myproduct",
+  "bundleName": "MyProduct.Revit.bundle",
+  "mainAssembly": "MyProduct.dll",
+  "addinFileName": "MyProduct.addin",
+  "entryClass": "MyProduct.App.App",
+  "displayName": "My Product",
+  "companyName": "MyCompany",
+  "vendorId": "MYC",
+  "description": "Short product description for PackageContents.xml.",
+  "supportedYears": [2024, 2025, 2026],
+  "csprojPath": "src/MyProduct/MyProduct.csproj",
+  "requiredDlls": {
+    "net48": [
+      "MyProduct.dll",
+      "System.Text.Json.dll",
+      "LicensingSystem.Agent.Ipc.Revit.dll",
+      "LicensingSystem.Contracts.dll",
+      "LicensingSystem.Revit.Licensing.dll"
+    ],
+    "net8": [
+      "MyProduct.dll",
+      "LicensingSystem.Revit.Licensing.dll"
+    ]
+  },
+  "minDllCount": {
+    "net48": 5,
+    "net8": 2
+  }
+}

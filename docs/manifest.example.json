@@ -1,0 +1,21 @@
+{
+  "channel": "stable",
+  "items": [
+    {
+      "productCode": "revit.pluginA",
+      "version": "1.0.0",
+      "channel": "stable",
+      "sha256": "REPLACE_WITH_SHA256_HEX_OF_ZIP",
+      "relativePath": "builds/revit.pluginA/1.0.0/package.zip",
+      "fileName": "package.zip"
+    },
+    {
+      "productCode": "revit.licenseprobe",
+      "version": "1.0.0",
+      "channel": "stable",
+      "sha256": "REPLACE_WITH_SHA256_HEX_OF_LICENSE_PROBE_ZIP",
+      "relativePath": "builds/revit.licenseprobe/1.0.0/package.zip",
+      "fileName": "package.zip"
+    }
+  ]
+}

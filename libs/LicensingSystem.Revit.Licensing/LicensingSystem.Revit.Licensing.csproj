@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>LicensingSystem.Revit.Licensing</RootNamespace>
+    <AssemblyName>LicensingSystem.Revit.Licensing</AssemblyName>
+    <Version>1.0.0</Version>
+    <Description>Shared Revit add-in licensing helpers: ES256 proof verification and named-pipe canRun status (agent IPC). Targets net48 (Revit 2024) and net8.0-windows (Revit 2025+).</Description>
+    <IsPackable>true</IsPackable>
+    <PackageId>LicensingSystem.Revit.Licensing</PackageId>
+    <Authors>LicensingSystem</Authors>
+    <PackageTags>revit;licensing;licensingsystem;es256;named-pipe</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- Referenced projects use git/minver-style prerelease versions until published as stable packages. -->
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LicensingSystem.Contracts\LicensingSystem.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <ProjectReference Include="..\LicensingSystem.Agent.Ipc.Revit\LicensingSystem.Agent.Ipc.Revit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <ProjectReference Include="..\LicensingSystem.Agent.Ipc\LicensingSystem.Agent.Ipc.csproj" />
+  </ItemGroup>
+
+</Project>

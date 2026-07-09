@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <RootNamespace>LicensingSystem.Agent.Ipc</RootNamespace>
+    <AssemblyName>LicensingSystem.Agent.Ipc.Revit</AssemblyName>
+    <Description>Named-pipe IPC client subset for Revit 2024 (.NET Framework). Wire format matches LicensingSystem.Agent.Ipc.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LicensingSystem.Contracts\LicensingSystem.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+</Project>

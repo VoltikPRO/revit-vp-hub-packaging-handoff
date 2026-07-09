@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <!--
+      License Probe package targets Revit 2023–2027 (see revit/build-license-probe-package.ps1).
+      Single `dotnet build` default: first installed year you use locally.
+      Override: dotnet build -p:RevitInstallPath="C:\Program Files\Autodesk\Revit 2026"
+    -->
+    <RevitInstallPath Condition="'$(RevitInstallPath)' == ''">C:\Program Files\Autodesk\Revit 2025</RevitInstallPath>
+  </PropertyGroup>
+</Project>
