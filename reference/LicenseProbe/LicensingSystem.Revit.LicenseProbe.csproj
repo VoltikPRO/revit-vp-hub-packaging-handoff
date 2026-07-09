@@ -11,6 +11,7 @@
     <LangVersion>latest</LangVersion>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Version>1.0.10</Version>
+    <CopyLocalLockFileAssemblies Condition="'$(TargetFramework)' == 'net48'">true</CopyLocalLockFileAssemblies>
 
     <!--
       Revit API references are local-only. If Revit isn't installed (CI/dev box),

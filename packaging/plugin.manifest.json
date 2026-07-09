@@ -1,0 +1,30 @@
+{
+  "productCode": "licencing.probe",
+  "bundleName": "LicenseProbe.Revit.bundle",
+  "mainAssembly": "LicensingSystem.Revit.LicenseProbe.dll",
+  "addinFileName": "LicenseProbe.addin",
+  "entryClass": "LicensingSystem.Revit.LicenseProbe.LicenseProbeApplication",
+  "displayName": "License Probe",
+  "companyName": "VP-Hub",
+  "vendorId": "VPH",
+  "description": "Reference Revit add-in for VP-Hub licensing diagnostics.",
+  "supportedYears": [2023, 2024, 2025, 2026],
+  "csprojPath": "reference/LicenseProbe/LicensingSystem.Revit.LicenseProbe.csproj",
+  "requiredDlls": {
+    "net48": [
+      "LicensingSystem.Revit.LicenseProbe.dll",
+      "System.Text.Json.dll",
+      "LicensingSystem.Agent.Ipc.Revit.dll",
+      "LicensingSystem.Contracts.dll",
+      "LicensingSystem.Revit.Licensing.dll"
+    ],
+    "net8": [
+      "LicensingSystem.Revit.LicenseProbe.dll",
+      "LicensingSystem.Revit.Licensing.dll"
+    ]
+  },
+  "minDllCount": {
+    "net48": 5,
+    "net8": 2
+  }
+}

@@ -2,6 +2,8 @@
 
 Copy into PR descriptions when integrating VP-Hub licensing and packaging.
 
+**License Probe reference add-in:** `reference/LicenseProbe/` — phases B–D implemented; complete portal TODOs before release.
+
 ## Portal / identity
 
 - [ ] `ProductCode` matches publisher portal product **Code**

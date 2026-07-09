@@ -23,6 +23,12 @@ public sealed class LicenseProbeAboutCommand : IExternalCommand
         {
             var revitVersion = commandData.Application?.Application?.VersionNumber ?? "(unknown)";
 
+            if (!LicenseProbeEnsureLicensed.TryAllow(revitVersion, correlationId, out var denyMessage))
+            {
+                TaskDialog.Show("License Probe — Licensing", denyMessage);
+                return Result.Cancelled;
+            }
+
             var model = LicenseProbeAboutInfoProvider.Build(
                 revitVersion: revitVersion,
                 correlationId: correlationId,

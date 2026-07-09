@@ -4,13 +4,21 @@ This folder is a **License Probe** sample from the VP-Hub / LicensingSystem ecos
 
 ## What to read
 
-1. `LicenseProbeCommand.cs` — command gating + `RevitLicenseCanRunReport`
-2. `LicenseProbeConstants.cs` + `LicenseProbePinningFactory.cs` + `LicenseProbePinnedEcKey.cs` — pinning
-3. `LicenseProbeApplication.cs` — ribbon / app entry
+1. `LicenseProbeCommand.cs` — command + `LicenseProbeEnsureLicensed.BuildStatusReportAsync`
+2. `LicenseProbeEnsureLicensed.cs` — central gate (`TryAllow` + `RevitLicenseCanRunReport`)
+3. `LicenseProbeConstants.cs` + `LicenseProbePinningFactory.cs` + `LicenseProbePinnedEcKey.cs` — pinning
+4. `LicenseProbeApplication.cs` — ribbon / `LicenseProbeAssemblyResolver` (net48)
+5. `LicenseProbeAboutCommand.cs` — gated with `TryAllow`
+
+## Packaging
+
+Requires Revit API installed. See `packaging/plugin.manifest.json`.
+
+```powershell
+powershell -File packaging/Build-ProductApplicationPackage.ps1 -AllowPartialYears -RevitYears 2026
+```
 
 ## Build (optional)
-
-Requires Revit API installed:
 
 ```powershell
 dotnet build reference/LicenseProbe/LicensingSystem.Revit.LicenseProbe.csproj -c Release `

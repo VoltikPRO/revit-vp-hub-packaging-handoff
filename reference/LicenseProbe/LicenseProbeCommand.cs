@@ -23,8 +23,8 @@ public sealed class LicenseProbeCommand : IExternalCommand
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var revitVersion = commandData.Application?.Application?.VersionNumber ?? "(unknown)";
-            var text = LicenseProbeLicenseMessage
-                .BuildAsync(revitVersion, ct: cts.Token, correlationId: correlationId)
+            var text = LicenseProbeEnsureLicensed
+                .BuildStatusReportAsync(revitVersion, ct: cts.Token, correlationId: correlationId)
                 .GetAwaiter()
                 .GetResult();
             LicenseProbeFileLog.Write("Command.Execute: showing TaskDialog.", correlationId);

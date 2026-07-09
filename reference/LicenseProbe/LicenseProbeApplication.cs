@@ -12,6 +12,9 @@ public sealed class LicenseProbeApplication : IExternalApplication
     {
         try
         {
+#if NETFRAMEWORK
+            LicenseProbeAssemblyResolver.Register();
+#endif
             var revitVersion = application.ControlledApplication.VersionNumber;
             var asmPath = typeof(LicenseProbeApplication).Assembly.Location;
             LicenseProbeFileLog.Write(
