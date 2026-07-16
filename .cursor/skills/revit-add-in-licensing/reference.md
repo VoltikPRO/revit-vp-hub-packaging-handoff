@@ -20,6 +20,17 @@ Companion to `SKILL.md`. Docs: [`docs/revit-licensing.md`](../../../docs/revit-l
 2. net48: P-256 X/Y in sync with PEM (`reference/LicenseProbe/LicenseProbePinnedEcKey.cs`)
 3. Gate every entry point; cache verified OK (~60s)
 
+### `pluginVersion` for canRun / logPluginEvent
+
+Pass a version string that identifies the **product release**, not only the assembly identity.
+
+With **Nerdbank.GitVersioning**, `assemblyVersion.precision: minor` keeps `AssemblyVersion` at `major.minor.0.0` (avoids .NET Framework binding-redirect churn). In that setup:
+
+- Prefer **`FileVersion`** (or InformationalVersion without git metadata) for IPC `pluginVersion`
+- Do **not** use only `Assembly.GetName().Version` — it will not distinguish patches such as `2026.6.0` vs `2026.5.18`
+
+Example: read `FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion` with a fallback to the assembly version.
+
 ## Smoke tests
 
 From `docs/revit-add-in-onboarding.md` §4:

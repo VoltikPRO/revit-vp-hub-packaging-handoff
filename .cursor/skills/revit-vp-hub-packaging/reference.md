@@ -71,3 +71,30 @@ After build, add to `artifacts/manifest.json`:
 See [`templates/PluginAssemblyResolver.template.cs`](../../../templates/PluginAssemblyResolver.template.cs).
 
 Register **before** licensing or IPC in `OnStartup`.
+
+## Pitfalls
+
+### SDK `**/*.cs` globs
+
+Root SDK projects include vendored trees unless excluded:
+
+```xml
+<Compile Remove="_handoff-extract\**" />
+<Compile Remove="packaging\**" />
+```
+
+### API mirror roots
+
+`Resolve-RevitInstallRoot` checks `revit/revit-api` then `revit-api`, then Autodesk.
+
+### NBGV + packaging order
+
+Commit `version.json` before production `Build-ProductApplicationPackage.ps1` so FileVersion / PackageContents AppVersion match the release.
+
+### Not portal-ready
+
+Bare `bin\` folders and ad-hoc `deploy/publish/RevitYYYY` copies are **not** VP-Hub update packages. Only `package.zip` with a single root `*.bundle` is.
+
+### Golden net48 Contents check
+
+After packaging, each net48 `Contents/<year>/` must be self-contained (see required DLL table above). Compare against a working ApplicationPlugins install when in doubt.

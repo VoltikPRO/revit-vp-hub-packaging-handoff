@@ -8,6 +8,8 @@ Bump `version.json` at the plugin repo root:
 { "version": "1.2.3" }
 ```
 
+**Commit** the bump before packaging when using Nerdbank.GitVersioning (NBGV reads the committed version for FileVersion / InformationalVersion).
+
 ## 2. Production build
 
 From plugin repo root (after adopting packaging scripts):
@@ -19,10 +21,14 @@ powershell -File packaging/Build-ProductApplicationPackage.ps1
 Requirements:
 
 - All `supportedYears` in `packaging/plugin.manifest.json`
-- No `-AllowPartialYears`
+- No `-AllowPartialYears` (never upload a partial-year ZIP to the portal)
 - `Test-RevitApplicationPackage.ps1` passes
 
-Output: `artifacts/builds/<productCode>/<version>/package.zip` and SHA-256 on console.
+Output:
+
+- `artifacts/builds/<productCode>/<version>/package.zip` (primary)
+- Identical named copy `<productCode>-<version>.zip` when scripts emit it
+- SHA-256 printed on the console
 
 ## 3. Manifest entry
 

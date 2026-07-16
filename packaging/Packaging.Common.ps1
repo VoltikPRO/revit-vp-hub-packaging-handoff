@@ -33,15 +33,21 @@ function Resolve-RevitInstallRoot {
         [int[]] $Years,
         [string] $Fallback = "C:\Program Files\Autodesk"
     )
-    $localApi = Join-Path $RepoRoot "revit-api"
-    $allLocal = $true
-    foreach ($y in $Years) {
-        if (-not (Test-RevitApi -Root $localApi -Year $y)) {
-            $allLocal = $false
-            break
+
+    foreach ($candidate in @(
+            (Join-Path $RepoRoot "revit\revit-api"),
+            (Join-Path $RepoRoot "revit-api")
+        )) {
+        $allLocal = $true
+        foreach ($y in $Years) {
+            if (-not (Test-RevitApi -Root $candidate -Year $y)) {
+                $allLocal = $false
+                break
+            }
         }
+        if ($allLocal) { return $candidate }
     }
-    if ($allLocal) { return $localApi }
+
     return $Fallback
 }
 

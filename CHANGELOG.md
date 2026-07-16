@@ -1,5 +1,13 @@
 ﻿# Changelog
 
+## 1.0.2 — 2026-07-16
+
+- Packaging: `Resolve-RevitInstallRoot` prefers `revit/revit-api`, then `revit-api`, then Autodesk (`packaging/` + `templates/packaging/`).
+- Skills: pitfalls for SDK `**/*.cs` globs / `Compile Remove`, dual API mirrors, commit-before-package, deploy layout confusion, golden net48 Contents check.
+- Licensing reference: prefer **FileVersion** for IPC `pluginVersion` when NBGV uses `assemblyVersion.precision: minor`.
+- `RELEASE.md`: commit `version.json` before production build; clarify output path; forbid partial-year portal uploads.
+- `docs/lp-net48-overlay.md`: LP multi-year packaging marked implemented; keep net48 self-contained DLL checklist.
+
 ## 1.0.1 — 2026-07-09
 
 - License Probe reference add-in: full integration demo (`EnsureLicensed`, net48 `AssemblyResolver`, command gating).

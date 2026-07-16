@@ -122,6 +122,50 @@ After `package.zip` is built:
 - ZIP with bare `Contents/` at root
 - Skipping licensed net48 DLL validation for VP-Hub products
 
+## Pitfalls (from publisher integrations)
+
+### SDK default globs at repo root
+
+A root-level `Microsoft.NET.Sdk` / `WindowsDesktop` project compiles `**/*.cs` under the repo, including vendored trees (`_handoff-extract/`, misplaced `libs/` sources). That can pull Agent.Core file-scoped namespaces into the add-in and fail under older `LangVersion` (e.g. 7.3).
+
+Exclude vendored trees from compile:
+
+```xml
+<Compile Remove="_handoff-extract\**" />
+<Compile Remove="packaging\**" />
+<!-- also exclude libs source trees if they are not ProjectReference-only -->
+```
+
+Prefer `ProjectReference` to `libs/LicensingSystem.Revit.Licensing` (or equivalent) — do not compile LicensingSystem sources into the add-in project.
+
+### Local Revit API mirrors
+
+`Resolve-RevitInstallRoot` tries, in order: `revit/revit-api`, then `revit-api`, then Autodesk install folders. Layout:
+
+```text
+revit/revit-api/   (or revit-api/)
+  Revit 2023/  ← RevitAPI.dll, RevitAPIUI.dll
+  Revit 2024/
+  ...
+```
+
+### Version bump before packaging
+
+1. Bump and **commit** `version.json` (Nerdbank.GitVersioning reads committed version).
+2. Run production packaging (no `-AllowPartialYears`).
+3. Upload `package.zip` + SHA-256.
+
+### Two deploy layouts — do not confuse
+
+| Layout | Purpose |
+|--------|---------|
+| `deploy/<year>/` → `*.bundle` → `package.zip` | **Portal / VP-Hub** (only this) |
+| `bin\...` or ad-hoc `deploy/publish/RevitYYYY` | Local smoke only — not an update package |
+
+### Golden check after build
+
+Compare `Contents/2024/` (or net48 year) to a known-good ApplicationPlugins install: must include `System.Text.Json.dll`, `LicensingSystem.Agent.Ipc.Revit.dll`, `LicensingSystem.Contracts.dll`, `LicensingSystem.Revit.Licensing.dll`, and the main add-in DLL.
+
 ## Additional resources
 
 - [reference.md](reference.md)
