@@ -84,3 +84,13 @@ Changes are not complete unless all of the following are true:
 - pinned publisher checks are present
 - failure paths deny execution by default
 
+## Localization (EN + UK)
+
+All new **user-visible** copy must be bilingual. See [`docs/architecture/localization.md`](docs/architecture/localization.md).
+
+- **Web:** `ls_locale` → `data-locale`; `frontend/shared/i18n/`; API errors via `error.code` map (`api-error-copy.ts`)
+- **Agent WPF:** `Strings.en.resx` / `Strings.uk.resx`; Settings language override
+- **Revit UX:** culture-aware TaskDialog/report strings; `CanRunReasonMessages` with locale
+
+Do not translate technical identifiers (product codes, UUIDs, PEM). Terminology: entitlement → право на продукт; join key → код запрошення.
+

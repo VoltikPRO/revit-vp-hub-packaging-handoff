@@ -11,13 +11,12 @@
     <LangVersion>latest</LangVersion>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Version>1.0.10</Version>
-    <CopyLocalLockFileAssemblies Condition="'$(TargetFramework)' == 'net48'">true</CopyLocalLockFileAssemblies>
 
     <!--
       Revit API references are local-only. If Revit isn't installed (CI/dev box),
       we still want the repo to build/test successfully.
-      Revit 2024 = .NET Framework 4.8 â†’ build net48 + LicensingSystem.Agent.Ipc.Revit.
-      Revit 2025+ = .NET 8 â†’ build net8.0-windows + full LicensingSystem.Agent.Ipc.
+      Revit 2024 = .NET Framework 4.8 в†’ build net48 + LicensingSystem.Agent.Ipc.Revit.
+      Revit 2025+ = .NET 8 в†’ build net8.0-windows + full LicensingSystem.Agent.Ipc.
     -->
     <HasRevitApi Condition="Exists('$(RevitInstallPath)\RevitAPI.dll') and Exists('$(RevitInstallPath)\RevitAPIUI.dll')">true</HasRevitApi>
     <HasRevitApi Condition="'$(HasRevitApi)' == ''">false</HasRevitApi>

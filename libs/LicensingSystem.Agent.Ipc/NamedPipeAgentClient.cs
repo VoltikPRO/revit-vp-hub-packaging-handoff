@@ -1,4 +1,4 @@
-﻿using System.IO.Pipes;
+using System.IO.Pipes;
 using System.Text;
 using System.Text.Json;
 using LicensingSystem.Contracts.Agent.Grants;
@@ -56,7 +56,8 @@ public sealed class NamedPipeAgentClient
                 throw new TimeoutException($"Agent IPC response timed out after {ResponseTimeoutMs}ms.");
             }
 
-            return JsonSerializer.Deserialize<TResponse>(responseBytes, JsonOptions)
+            // String overload (not ReadOnlySpan<byte>) — Revit 2024 STJ AppDomain conflicts; keep in sync with Agent.Ipc.Revit.
+            return JsonSerializer.Deserialize<TResponse>(Encoding.UTF8.GetString(responseBytes), JsonOptions)
                    ?? throw new InvalidOperationException("Could not deserialize agent response.");
         }
         finally

@@ -1,5 +1,19 @@
 ﻿# Changelog
 
+## 1.0.11 — 2026-07-19
+
+- **Fix (Revit 2024 STJ):** `NamedPipeAgentClient` deserializes IPC responses via UTF-8 **string** overload (not `ReadOnlySpan<byte>`), avoiding `MissingMethodException` when another add-in already loaded an older `System.Text.Json` into the shared AppDomain.
+- Synced from LicensingSystem: `Agent.Ipc.Revit`, slim `Agent.Ipc` template, Contracts, Revit.Licensing, LicenseProbe reference.
+- `docs/lp-net48-overlay.md`: document STJ conflict, LP-only hardening (preload / honest UX), smoke row for MissingMethod.
+- `SMOKE-TESTS.md`: net48 checklist includes STJ MissingMethod / multi-add-in case.
+
+## SDK sync 2026-07-19
+
+- Source: LicensingSystem (v0.3.88-19-g711d9a6)
+- libs: Revit.Licensing, Contracts, Agent.Ipc, Agent.Ipc.Revit
+- reference: LicenseProbe
+- docs: publisher-facing copies
+
 ## 1.0.2 — 2026-07-16
 
 - Packaging: `Resolve-RevitInstallRoot` prefers `revit/revit-api`, then `revit-api`, then Autodesk (`packaging/` + `templates/packaging/`).

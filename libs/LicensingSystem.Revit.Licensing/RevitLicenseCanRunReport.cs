@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using LicensingSystem.Agent.Ipc;
 using LicensingSystem.Contracts.Agent;
@@ -13,6 +14,22 @@ namespace LicensingSystem.Revit.Licensing;
 public static class RevitLicenseCanRunReport
 {
     public static readonly TimeSpan DefaultVerifiedOkCacheTtl = TimeSpan.FromSeconds(60);
+
+    /// <summary>Maps <see cref="CultureInfo.CurrentUICulture"/> to agent reason locale (<c>uk</c> or <c>null</c> for English).</summary>
+    public static string? ResolveUiLocale(CultureInfo? culture = null)
+    {
+        var name = (culture ?? CultureInfo.CurrentUICulture).Name;
+        if (string.Equals(name, "uk", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(name, "uk-UA", StringComparison.OrdinalIgnoreCase))
+        {
+            return "uk";
+        }
+
+        return null;
+    }
+
+    public static bool IsUkUiCulture(CultureInfo? culture = null) =>
+        ResolveUiLocale(culture) is not null;
 
     private static readonly object CacheLock = new();
     private static string? _cachedProductCode;
@@ -35,6 +52,7 @@ public static class RevitLicenseCanRunReport
         string? correlationId = null,
         CancellationToken cancellationToken = default)
     {
+        var locale = ResolveUiLocale();
         var ttl = verifiedOkCacheTtl ?? DefaultVerifiedOkCacheTtl;
         if (ttl > TimeSpan.Zero)
         {
@@ -88,9 +106,9 @@ public static class RevitLicenseCanRunReport
                 trace,
                 $"BuildAsync: canRun IPC failed after {sw.ElapsedMilliseconds}ms {ex.GetType().Name}: {ex.Message}");
             var sbFail = new StringBuilder();
-            sbFail.AppendLine(FormatIpcFailureSummary(ex));
+            sbFail.AppendLine(FormatIpcFailureSummary(ex, locale));
             sbFail.AppendLine();
-            sbFail.AppendLine("Details");
+            sbFail.AppendLine(SectionHeaderDetails(locale));
             sbFail.AppendLine($"- Revit: {revitVersion ?? "(unknown)"}");
             sbFail.AppendLine($"- Product: {pinning.ProductCode}");
             sbFail.AppendLine($"- Add-in version: {pluginVersion}");
@@ -106,7 +124,8 @@ public static class RevitLicenseCanRunReport
                 sbFail.AppendLine();
             }
 
-            sbFail.AppendLine(FormatIpcFailureNextSteps(ex));
+            sbFail.AppendLine(SectionHeaderNextStep(locale));
+            sbFail.AppendLine(FormatIpcFailureNextSteps(ex, locale));
             return sbFail.ToString().TrimEnd();
         }
 
@@ -116,18 +135,25 @@ public static class RevitLicenseCanRunReport
             $"BuildAsync: canRun OK in {sw.ElapsedMilliseconds}ms allowed={proof.Allowed} reason={TruncateForLog(proof.Reason, 240)} grant={(proof.Grant is not null)} publisherKey={(proof.PublisherKey is not null)}");
 
         var sb = new StringBuilder();
-        sb.AppendLine($"Product: {pinning.ProductCode}");
-        sb.AppendLine($"Add-in version: {pluginVersion}");
+        sb.AppendLine($"{Ui(locale, "Product", "Продукт")}: {pinning.ProductCode}");
+        sb.AppendLine($"{Ui(locale, "Add-in version", "Версія add-in")}: {pluginVersion}");
         sb.AppendLine();
 
         if (!proof.Allowed)
         {
             TraceLine(trace, "BuildAsync: policy denied (Allowed=false); building user message.");
-            sb.AppendLine("This product is not licensed for this machine.");
-            sb.AppendLine(CanRunReasonMessages.FormatWithCode(proof.Reason));
-            AppendGrantHint(sb, proof, pinning);
+            sb.AppendLine(Ui(
+                locale,
+                "This product is not licensed for this machine.",
+                "Цей продукт не ліцензований для цього ПК."));
+            sb.AppendLine(CanRunReasonMessages.FormatWithCode(proof.Reason, locale));
+            sb.AppendLine();
+            sb.AppendLine(SectionHeaderNextStep(locale));
+            sb.AppendLine(CanRunReasonMessages.NextStep(proof.Reason, locale));
+            AppendGrantHint(sb, proof, pinning, locale);
             AppendDetails(
                 sb,
+                locale,
                 revitVersion,
                 correlationId,
                 pipeName,
@@ -137,7 +163,10 @@ public static class RevitLicenseCanRunReport
                 proof,
                 canRunMs,
                 verificationOk: false,
-                verificationError: "Denied by policy (Allowed=false).");
+                verificationError: Ui(
+                    locale,
+                    "Denied by policy (Allowed=false).",
+                    "Відхилено політикою (Allowed=false)."));
             return sb.ToString().TrimEnd();
         }
 
@@ -146,10 +175,17 @@ public static class RevitLicenseCanRunReport
             TraceLine(
                 trace,
                 "BuildAsync: Allowed=true but missing grant or publisher key; deny.");
-            sb.AppendLine("License verification failed: the agent response did not include a signed grant.");
-            sb.AppendLine("Do not treat this session as licensed. Please contact support.");
+            sb.AppendLine(Ui(
+                locale,
+                "License verification failed: the agent response did not include a signed grant.",
+                "Перевірку ліцензії не пройдено: відповідь агента не містила підписаного grant."));
+            sb.AppendLine(CanRunReasonMessages.FormatWithCode(ReasonCodes.ProofMissing, locale));
+            sb.AppendLine();
+            sb.AppendLine(SectionHeaderNextStep(locale));
+            sb.AppendLine(CanRunReasonMessages.NextStep(ReasonCodes.ProofMissing, locale));
             AppendDetails(
                 sb,
+                locale,
                 revitVersion,
                 correlationId,
                 pipeName,
@@ -159,20 +195,33 @@ public static class RevitLicenseCanRunReport
                 proof,
                 canRunMs,
                 verificationOk: false,
-                verificationError: "Allowed=true but missing Grant and/or PublisherKey.");
+                verificationError: Ui(
+                    locale,
+                    "Allowed=true but missing Grant and/or PublisherKey.",
+                    "Allowed=true, але відсутній Grant і/або PublisherKey."));
             return sb.ToString().TrimEnd();
         }
 
         TraceLine(trace, "BuildAsync: verifying publisher-signed grant (nonce/timestamp/product binding).");
-        if (!RevitLicenseProofVerifier.TryVerifyProof(proof, pinning, nonce, ts, out var proofError))
+        if (!RevitLicenseProofVerifier.TryVerifyProof(proof, pinning, nonce, ts, out var proofError, out var verifyReason))
         {
+            var code = verifyReason ?? ReasonCodes.RunProofInvalid;
             TraceLine(
                 trace,
-                $"BuildAsync: cryptographic verification failed: {TruncateForLog(proofError ?? "unknown", 400)}");
-            sb.AppendLine("License verification failed; please contact support.");
-            sb.AppendLine(proofError ?? "Unknown proof error.");
+                $"BuildAsync: cryptographic verification failed: {TruncateForLog(proofError ?? "unknown", 400)} reason={code}");
+            sb.AppendLine(Ui(
+                locale,
+                "License verification failed; please contact support.",
+                "Перевірку ліцензії не пройдено; зверніться до підтримки."));
+            sb.AppendLine(CanRunReasonMessages.FormatWithCode(code, locale));
+            if (!string.IsNullOrWhiteSpace(proofError))
+                sb.AppendLine(proofError);
+            sb.AppendLine();
+            sb.AppendLine(SectionHeaderNextStep(locale));
+            sb.AppendLine(CanRunReasonMessages.NextStep(code, locale));
             AppendDetails(
                 sb,
+                locale,
                 revitVersion,
                 correlationId,
                 pipeName,
@@ -182,13 +231,17 @@ public static class RevitLicenseCanRunReport
                 proof,
                 canRunMs,
                 verificationOk: false,
-                verificationError: proofError ?? "Unknown proof error.");
+                verificationError: proofError ?? Ui(locale, "Unknown proof error.", "Невідома помилка proof."));
             return sb.ToString().TrimEnd();
         }
 
-        sb.AppendLine("License: OK (publisher-signed grant verified for this build).");
+        sb.AppendLine(Ui(
+            locale,
+            "License: OK (publisher-signed grant verified for this build).",
+            "Ліцензія: OK (підписаний видавцем grant перевірено для цієї збірки)."));
         AppendDetails(
             sb,
+            locale,
             revitVersion,
             correlationId,
             pipeName,
@@ -217,31 +270,46 @@ public static class RevitLicenseCanRunReport
         return text;
     }
 
-    internal static string FormatIpcFailureSummary(Exception ex)
+    internal static string FormatIpcFailureSummary(Exception ex, string? locale = null)
     {
         if (IsMissingPluginDependency(ex))
         {
-            return "Plugin dependency missing (for example System.Text.Json). Reinstall or update this product from VP-Hub.";
+            return Ui(
+                locale,
+                "Plugin dependency missing (for example System.Text.Json). Reinstall or update this product from VP-Hub.",
+                "Відсутня залежність плагіна (наприклад System.Text.Json). Перевстановіть або оновіть продукт з VP-Hub.");
         }
 
         if (ex is TimeoutException
             || ex.InnerException is TimeoutException
             || ex.Message.Contains("timed out", StringComparison.OrdinalIgnoreCase))
         {
-            return "Licensing agent is not running or not signed in.";
+            return Ui(
+                locale,
+                "Licensing agent is not running or not signed in.",
+                "Agent ліцензування не запущений або ви не увійшли.");
         }
 
-        return "Licensing agent is not running or not signed in.";
+        return Ui(
+            locale,
+            "Licensing agent is not running or not signed in.",
+            "Agent ліцензування не запущений або ви не увійшли.");
     }
 
-    internal static string FormatIpcFailureNextSteps(Exception ex)
+    internal static string FormatIpcFailureNextSteps(Exception ex, string? locale = null)
     {
         if (IsMissingPluginDependency(ex))
         {
-            return "In VP-Hub, open Products, run Install / update for this product, then restart Revit. If the problem continues, export diagnostics and contact support.";
+            return Ui(
+                locale,
+                "In VP-Hub, open Products, run Install / update for this product, then restart Revit. If the problem continues, export diagnostics and contact support.",
+                "У VP-Hub відкрийте Products, виконайте Install / update для цього продукту, потім перезапустіть Revit. Якщо проблема лишається — експортуйте diagnostics і зверніться до підтримки.");
         }
 
-        return "Start the VP-Hub / LicensingSystem agent, sign in, and sync entitlements.";
+        return Ui(
+            locale,
+            "Start the VP-Hub / LicensingSystem agent, sign in, and sync entitlements.",
+            "Запустіть VP-Hub / LicensingSystem agent, увійдіть і синхронізуйте entitlements.");
     }
 
     private static bool IsMissingPluginDependency(Exception ex)
@@ -273,7 +341,11 @@ public static class RevitLicenseCanRunReport
         return s.Length <= maxLen ? s : s.Substring(0, maxLen) + "…";
     }
 
-    private static void AppendGrantHint(StringBuilder sb, CanRunProofDto proof, RevitLicensePinning pinning)
+    private static void AppendGrantHint(
+        StringBuilder sb,
+        CanRunProofDto proof,
+        RevitLicensePinning pinning,
+        string? locale)
     {
         if (proof.Grant is null || proof.PublisherKey is null)
             return;
@@ -286,17 +358,24 @@ public static class RevitLicenseCanRunReport
                 proof.RequestTimestampUtc,
                 out var err))
         {
-            sb.AppendLine(
-                "Note: a signed grant is present and matches pinned publisher settings, but entitlement or seat policy denied execution.");
+            sb.AppendLine(Ui(
+                locale,
+                "Note: a signed grant is present and matches pinned publisher settings, but entitlement or seat policy denied execution.",
+                "Примітка: підписаний grant наявний і відповідає закріпленим налаштуванням видавця, але entitlement або політика місць відхилила запуск."));
         }
         else
         {
-            sb.AppendLine("Grant present but not cryptographically trusted: " + (err ?? ""));
+            sb.AppendLine(Ui(
+                    locale,
+                    "Grant present but not cryptographically trusted: ",
+                    "Grant наявний, але криптографічно не довірений: ")
+                + (err ?? ""));
         }
     }
 
     private static void AppendDetails(
         StringBuilder sb,
+        string? locale,
         string? revitVersion,
         string? correlationId,
         string pipeName,
@@ -309,7 +388,7 @@ public static class RevitLicenseCanRunReport
         string? verificationError)
     {
         sb.AppendLine();
-        sb.AppendLine("Details");
+        sb.AppendLine(SectionHeaderDetails(locale));
 
         sb.AppendLine($"- Revit: {revitVersion ?? "(unknown)"}");
         sb.AppendLine($"- CorrelationId: {correlationId ?? "(none)"}");
@@ -365,4 +444,17 @@ public static class RevitLicenseCanRunReport
             sb.AppendLine("- Publisher key: (null)");
         }
     }
+
+    private static string SectionHeaderNextStep(string? locale) =>
+        Ui(locale, "Next step", "Наступний крок");
+
+    private static string SectionHeaderDetails(string? locale) =>
+        Ui(locale, "Details", "Деталі");
+
+    private static string Ui(string? locale, string en, string uk) =>
+        IsUkLocale(locale) ? uk : en;
+
+    private static bool IsUkLocale(string? locale) =>
+        string.Equals(locale, "uk", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(locale, "uk-UA", StringComparison.OrdinalIgnoreCase);
 }

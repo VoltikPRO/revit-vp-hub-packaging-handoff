@@ -43,4 +43,4 @@ Use this checklist when integrating a **new** or **updated** Revit add-in with L
 - Org/product onboarding (IT): [`../architecture/plugin-lifecycle-onboarding.md`](../architecture/plugin-lifecycle-onboarding.md).
 - PR checklist: [revit-pr-checklist.md](revit-pr-checklist.md).
 - **Operator guide:** quality bar for publisher handoff kits and Cursor Skills (what to include, secrets, phases A–E, support contact): [`revit-publisher-handoff-and-skill-quality.md`](revit-publisher-handoff-and-skill-quality.md) (Ukrainian).
-- **ZIP / automation:** build a publisher kit ZIP from this repo: [`revit-publisher-handoff.md`](revit-publisher-handoff.md) (script `scripts/package-revit-publisher-handoff.ps1`).
+- **Publisher kit (canonical):** public GitHub [revit-vp-hub-packaging-handoff](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff) (clone / Releases / `adopt-into-project.ps1`). Portal fallback: Admin → Publisher kit. Details: [`revit-publisher-handoff.md`](revit-publisher-handoff.md).

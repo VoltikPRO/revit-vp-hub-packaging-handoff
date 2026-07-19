@@ -37,7 +37,9 @@ Run before marking a release done. See also `docs/revit-add-in-onboarding.md` §
 ### 5. net48 dependencies (Revit 2023–2024)
 
 - [ ] No `FileNotFoundException` for `System.Text.Json` or `LicensingSystem.*`
+- [ ] No `MissingMethodException` on `JsonSerializer.Deserialize(ReadOnlySpan<byte>, …)` (IPC uses string Deserialize)
 - [ ] Bundle `Contents/<year>/` is self-contained (no manual DLL copies)
+- [ ] With another STJ-using add-in loaded (if available): license check reaches agent, or shows dependency-conflict UX — **not** “agent not running”
 
 ### 6. Packaging layout
 
