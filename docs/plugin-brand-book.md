@@ -1,11 +1,13 @@
 # Plugin Brand Book (Revit add-ins)
 
-This brand book applies to **all plugins/add-ins** distributed via LicensingSystem (VP-Hub / agent installer).
+This brand book applies to **all plugins/add-ins** distributed via **VP-Hub** (agent installer + portal).
 It is written to be actionable for humans and Cursor/AI agents generating new add-ins.
 
 ## Brand identity (baseline)
 
-- **Brand name (product family):** VP-Hub / LicensingSystem (use the same naming as the project/repo)
+- **Platform (user-facing):** VP-Hub — portal, agent, catalog
+- **Publisher (product cards / plugin identity):** VoltikPRO for Voltik products; other publishers keep their own names
+- **Code / repo identity:** LicensingSystem (namespaces, assemblies, named pipe, admin console) — do not rename for branding
 - **Voice:** professional, concise, engineering-first
 - **Promises we do NOT make:** “unbreakable”, “100% secure”, “always online”
 - **Primary goal:** clarity and predictability for B2B engineering workflows
@@ -70,7 +72,7 @@ When license gating blocks an action, the user must receive:
 
 - Summary: “Licensing agent is not running or not signed in.”
 - Next steps:
-  - “Start VP-Hub / LicensingSystem Agent”
+  - “Start VP-Hub Agent”
   - “Sign in and sync entitlements”
 
 #### Missing plugin dependency (Revit 2024 / net48)
@@ -81,7 +83,8 @@ Use when load fails **before** IPC (for example `FileNotFoundException` for `Sys
 - Next steps:
   - “In VP-Hub → Products, run Install / update”
   - “Restart Revit”
-  - “Export diagnostics if the problem continues”
+  - “In VP-Hub → About, use Report a problem (or Export diagnostics) if the problem continues”
+
 
 Do **not** use the agent-unreachable summary for missing-assembly errors.
 
@@ -98,7 +101,9 @@ Do **not** use the agent-unreachable summary for missing-assembly errors.
 ## Versioning & support signals
 
 - Always include plugin version in “License status” output.
-- Provide a “Diagnostics export” path where appropriate (the agent already supports diagnostics export; plugins should point users to it instead of reinventing).
+- Prefer **VP-Hub → Products → Update** on the VP-Hub row when a newer agent MSI is published (same notifications / yellow Update button as plugins). For diagnostics-only, use **About → Report a problem** (sends email via Resend automatically) or **Export diagnostics**.
+- In **Developer mode**, Products shows a version picker so users can install any published version (including older). Superadmin sets package **Availability** to *All users* or *Advanced only* in Release index.
+- Provide a “Diagnostics export” path where appropriate (the agent already supports diagnostics export; plugins should point users to Report a problem / Products Update / Export diagnostics instead of reinventing).
 
 ## What AI agents must do
 
@@ -110,4 +115,3 @@ When generating a new Revit add-in in this repo:
   - ribbon naming
   - dialog tone
   - consistent user-facing messaging
-

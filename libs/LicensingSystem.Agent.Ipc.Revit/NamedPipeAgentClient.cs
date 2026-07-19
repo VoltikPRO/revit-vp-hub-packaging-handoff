@@ -56,7 +56,10 @@ public sealed class NamedPipeAgentClient
                 throw new TimeoutException($"Agent IPC response timed out after {ResponseTimeoutMs}ms.");
             }
 
-            return JsonSerializer.Deserialize<TResponse>(responseBytes, JsonOptions)
+            // Use string overload (not ReadOnlySpan<byte>): Revit 2024 shared AppDomain often
+            // already has an older System.Text.Json from another add-in; span overload → MissingMethodException.
+            // Mirror this into Agent.Ipc and the publisher kit (revit-vp-hub-packaging-handoff) on sync.
+            return JsonSerializer.Deserialize<TResponse>(Encoding.UTF8.GetString(responseBytes), JsonOptions)
                    ?? throw new InvalidOperationException("Could not deserialize agent response.");
         }
         finally

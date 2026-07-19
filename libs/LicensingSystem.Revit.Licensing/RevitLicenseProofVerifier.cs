@@ -36,19 +36,32 @@ public static class RevitLicenseProofVerifier
         RevitLicensePinning pinning,
         string expectedNonce,
         DateTimeOffset expectedTimestampUtc,
-        out string? error)
+        out string? error) =>
+        TryVerifyProof(proof, pinning, expectedNonce, expectedTimestampUtc, out error, out _);
+
+    /// <param name="reasonCode">Canonical <see cref="ReasonCodes"/> value when verification fails; null on success.</param>
+    public static bool TryVerifyProof(
+        CanRunProofDto proof,
+        RevitLicensePinning pinning,
+        string expectedNonce,
+        DateTimeOffset expectedTimestampUtc,
+        out string? error,
+        out string? reasonCode)
     {
         error = null;
+        reasonCode = null;
 
         if (!string.Equals(proof.ProductCode, pinning.ProductCode, StringComparison.OrdinalIgnoreCase))
         {
             error = "ProductCode mismatch.";
+            reasonCode = ReasonCodes.RunProofInvalid;
             return false;
         }
 
         if (!string.Equals(proof.RequestNonce, expectedNonce, StringComparison.Ordinal))
         {
             error = "Nonce mismatch (possible replay or wrong response).";
+            reasonCode = ReasonCodes.ReplayDetected;
             return false;
         }
 
@@ -56,19 +69,53 @@ public static class RevitLicenseProofVerifier
         if (skew > TimeSpan.FromSeconds(SecurityConstants.ClockSkewSeconds))
         {
             error = $"Timestamp skew too large: {skew.TotalSeconds:F0}s.";
+            reasonCode = ReasonCodes.TimestampOutOfRange;
             return false;
         }
 
         if (proof.Grant is null || proof.PublisherKey is null)
         {
             error = "Missing grant or publisher key in response.";
+            reasonCode = ReasonCodes.ProofMissing;
             return false;
         }
 
-        if (!TryVerifyPublisherPinned(proof.PublisherKey, proof.Grant.Payload, pinning, out error))
+        var now = DateTimeOffset.UtcNow;
+        if (proof.PublisherKey.RevokedAtUtc is { } revokedAt && revokedAt <= now)
+        {
+            error = "Publisher key is revoked.";
+            reasonCode = ReasonCodes.RunProofInvalid;
             return false;
+        }
 
-        return TryVerifySignedGrantSignature(proof.Grant, pinning.ProductCode, pinning, out error);
+        var payload = proof.Grant.Payload;
+        if (payload.ValidFromUtc > now)
+        {
+            error = "Grant not yet valid.";
+            reasonCode = ReasonCodes.RunProofInvalid;
+            return false;
+        }
+
+        if (payload.ValidUntilUtc is { } until && until <= now)
+        {
+            error = "Grant expired.";
+            reasonCode = ReasonCodes.RunProofInvalid;
+            return false;
+        }
+
+        if (!TryVerifyPublisherPinned(proof.PublisherKey, payload, pinning, out error))
+        {
+            reasonCode = ReasonCodes.RunProofInvalid;
+            return false;
+        }
+
+        if (!TryVerifySignedGrantSignature(proof.Grant, pinning.ProductCode, pinning, out error))
+        {
+            reasonCode = ReasonCodes.SignatureInvalid;
+            return false;
+        }
+
+        return true;
     }
 
     private static bool TryVerifyPublisherPinned(

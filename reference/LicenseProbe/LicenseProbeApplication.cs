@@ -1,4 +1,5 @@
 using Autodesk.Revit.UI;
+using LicensingSystem.Revit.Licensing;
 
 namespace LicensingSystem.Revit.LicenseProbe;
 
@@ -12,9 +13,6 @@ public sealed class LicenseProbeApplication : IExternalApplication
     {
         try
         {
-#if NETFRAMEWORK
-            LicenseProbeAssemblyResolver.Register();
-#endif
             var revitVersion = application.ControlledApplication.VersionNumber;
             var asmPath = typeof(LicenseProbeApplication).Assembly.Location;
             LicenseProbeFileLog.Write(
@@ -35,25 +33,24 @@ public sealed class LicenseProbeApplication : IExternalApplication
             var cmd = typeof(LicenseProbeCommand).FullName ?? nameof(LicenseProbeCommand);
             var data = new PushButtonData(
                 nameof(LicenseProbeCommand),
-                "License" + Environment.NewLine + "status",
+                LicenseProbeUi.LicenseStatusButtonLabel,
                 asm,
                 cmd)
             {
-                ToolTip = "Show whether a verified license is available (local agent IPC).",
-                LongDescription =
-                    "Calls the local LicensingSystem agent once and shows a short message. Template for publisher-signed canRun checks.",
+                ToolTip = LicenseProbeUi.LicenseStatusToolTip,
+                LongDescription = LicenseProbeUi.LicenseStatusLongDescription,
             };
             panel.AddItem(data);
 
             var aboutCmd = typeof(LicenseProbeAboutCommand).FullName ?? nameof(LicenseProbeAboutCommand);
             var aboutData = new PushButtonData(
                 nameof(LicenseProbeAboutCommand),
-                "About",
+                LicenseProbeUi.AboutButtonLabel,
                 asm,
                 aboutCmd)
             {
-                ToolTip = "About VP-Hub / LicensingSystem License Probe.",
-                LongDescription = "Shows brand, build/version, and agent connectivity summary (no secrets).",
+                ToolTip = LicenseProbeUi.AboutToolTip,
+                LongDescription = LicenseProbeUi.AboutLongDescription,
             };
             panel.AddItem(aboutData);
 
@@ -64,7 +61,7 @@ public sealed class LicenseProbeApplication : IExternalApplication
         {
             LicenseProbeFileLog.Write(
                 $"ExternalApplication.OnStartup: FAILED {ex.GetType().Name}: {ex.Message}");
-            TaskDialog.Show("License Probe — Licensing", $"Ribbon registration failed: {ex.Message}");
+            TaskDialog.Show(LicenseProbeUi.DialogTitle, LicenseProbeUi.RibbonRegistrationFailed(ex.Message));
             return Result.Failed;
         }
 

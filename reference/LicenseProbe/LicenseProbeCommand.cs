@@ -2,6 +2,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using LicensingSystem.Agent.Ipc;
+using LicensingSystem.Revit.Licensing;
 using System.Diagnostics;
 
 namespace LicensingSystem.Revit.LicenseProbe;
@@ -23,12 +24,12 @@ public sealed class LicenseProbeCommand : IExternalCommand
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var revitVersion = commandData.Application?.Application?.VersionNumber ?? "(unknown)";
-            var text = LicenseProbeEnsureLicensed
-                .BuildStatusReportAsync(revitVersion, ct: cts.Token, correlationId: correlationId)
+            var text = LicenseProbeLicenseMessage
+                .BuildAsync(revitVersion, ct: cts.Token, correlationId: correlationId)
                 .GetAwaiter()
                 .GetResult();
             LicenseProbeFileLog.Write("Command.Execute: showing TaskDialog.", correlationId);
-            TaskDialog.Show("License Probe — Licensing", text);
+            TaskDialog.Show(LicenseProbeUi.DialogTitle, text);
             sw.Stop();
             LicenseProbeFileLog.Write(
                 $"Command.Execute: dialog closed; total {sw.ElapsedMilliseconds}ms.",
