@@ -31,9 +31,9 @@ Multi-year VP-Hub packaging is **implemented** in `lp-revit-plugin` (`packaging/
 
 Publisher kit consumers: refresh `libs/` from [revit-vp-hub-packaging-handoff](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff) **≥ 1.0.11** (or re-run `scripts/sync-from-licensingsystem.ps1` / `adopt-into-project.ps1`) so `Agent.Ipc.Revit` includes the string-Deserialize fix.
 
-## Reference implementation (this repo)
+## Packaging pattern (net48 self-contained)
 
-Copy the artifact pattern from [revit/build-license-probe-package.ps1](../../revit/build-license-probe-package.ps1) → `Copy-ProbeBuildArtifacts`:
+Copy **all** build outputs into `Contents/<year>/` (see [`revit-bundle-packaging.md`](../architecture/revit-bundle-packaging.md) and publisher kit templates):
 
 ```powershell
 foreach ($pat in '*.dll', '*.pdb', '*.deps.json', '*.runtimeconfig.json', '*.dll.config') {

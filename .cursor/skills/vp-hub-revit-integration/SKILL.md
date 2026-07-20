@@ -31,8 +31,9 @@ Policy: [`docs/AGENTS.md`](../../../docs/AGENTS.md). Human guides: [`ONBOARDING.
 1. Add `ProjectReference` to `libs/LicensingSystem.Revit.Licensing` (or NuGet equivalent).
 2. Reference correct IPC project per TFM matrix (see licensing skill).
 3. Create constants from portal **Pinning & keys** (C# snippet): `ProductCode`, publisher PEM, Kid, PublisherId.
-4. On **net48**, embed P-256 **X/Y** consistent with PEM (pattern: `reference/LicenseProbe/LicenseProbePinnedEcKey.cs`).
+4. On **net48**, embed P-256 **X/Y** consistent with PEM when using `ECParameters`.
 5. Implement central `EnsureLicensed(...)` using `RevitLicenseCanRunReport.BuildAsync` (templates in `templates/`).
+6. Local diagnostics: `VpHubPluginFileLog.Write(productCode, …)` → `%LocalAppData%\VP-Hub\logs\{productCode}.log`.
 
 ### Phase C — Gate commands
 
@@ -51,18 +52,14 @@ Policy: [`docs/AGENTS.md`](../../../docs/AGENTS.md). Human guides: [`ONBOARDING.
 1. Bump `version.json`; production build (all years, no `-AllowPartialYears`).
 2. Record SHA-256; add manifest entry per [`RELEASE.md`](../../../RELEASE.md).
 3. Upload via publisher portal; Install/Update through VP-Hub agent.
-4. Run [`SMOKE-TESTS.md`](../../../SMOKE-TESTS.md) (include `canRun` in agent log for licensed products).
+4. Run [`SMOKE-TESTS.md`](../../../SMOKE-TESTS.md) (include `canRun` in agent log and `{productCode}.log` under `VP-Hub\logs`).
 
 ## Definition of done
 
 See [`INTEGRATION-CHECKLIST.md`](../../../INTEGRATION-CHECKLIST.md).
 
-## Reference sample (read-only)
-
-[`reference/LicenseProbe/`](../../../reference/LicenseProbe/) — do not ship as a product; copy patterns only.
-
 ## Suggested prompt
 
-> Integrate this Revit add-in with VP-Hub using vp-hub-revit-integration. Follow phases A–E. Gate every command. Do not call the cloud API from Revit.
+> Integrate this Revit add-in with VP-Hub using vp-hub-revit-integration. Follow phases A–E. Gate every command. Use VpHubPluginFileLog for local diagnostics. Do not call the cloud API from Revit.
 
 Extended checklist: [`reference.md`](reference.md).

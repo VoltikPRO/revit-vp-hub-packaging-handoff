@@ -9,7 +9,7 @@ namespace LicensingSystem.Revit.Licensing;
 
 /// <summary>
 /// Calls the local agent <c>canRun</c> over the named pipe, verifies publisher-signed proof material, and formats a support-oriented status report.
-/// Caches a verified-OK report for <see cref="DefaultVerifiedOkCacheTtl"/> (same policy as the License Probe template).
+/// Caches a verified-OK report for <see cref="DefaultVerifiedOkCacheTtl"/> (typical 30–120s policy for add-ins).
 /// </summary>
 public static class RevitLicenseCanRunReport
 {

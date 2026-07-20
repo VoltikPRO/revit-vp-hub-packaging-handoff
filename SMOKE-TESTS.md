@@ -19,6 +19,8 @@ Run before marking a release done. See also `docs/revit-add-in-onboarding.md` §
 - [ ] Add-in appears (ribbon or Add-Ins)
 - [ ] Licensed command runs after proof verification
 - [ ] `%LocalAppData%\VP-Hub\agent-namedpipe.log` contains `canRun` after command
+- [ ] `%LocalAppData%\VP-Hub\logs\{productCode}.log` exists (via `VpHubPluginFileLog`)
+- [ ] Agent **Export diagnostics** ZIP includes `logs/{productCode}.log` (agent with DiagnosticsLogPackager)
 
 ### 2. Agent unavailable
 

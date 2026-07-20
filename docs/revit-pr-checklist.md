@@ -20,15 +20,24 @@ Copy into a PR description when changing licensing, IPC, or publisher pins.
 ## Packaging (must for Revit 2023–2024)
 
 - [ ] **Bundle self-contained for net48:** `Contents/<year>/` includes all transitive `*.dll` from the net48 build (not only the main add-in DLL). Minimum: `System.Text.Json.dll`, IPC client (`LicensingSystem.Agent.Ipc.Revit.dll`), `LicensingSystem.Contracts.dll`.
-- [ ] Packaging script copies artifacts like [build-license-probe-package.ps1](../../revit/build-license-probe-package.ps1) (`Copy-ProbeBuildArtifacts`).
+- [ ] Packaging script copies all build-output DLLs into `Contents/<year>/` (see [`revit-bundle-packaging.md`](revit-bundle-packaging.md) and publisher kit templates).
 - [ ] CI or script fails if required net48 DLLs are missing from the ZIP.
 
 ## UX / support
 
-- [ ] User-facing strings for agent unreachable, missing plugin dependency, not entitled, and verification failure follow [`docs/brand/plugin-brand-book.md`](../brand/plugin-brand-book.md) where relevant.
+- [ ] User-facing strings for agent unreachable, missing plugin dependency, not entitled, and verification failure follow [`plugin-brand-book.md`](plugin-brand-book.md) where relevant.
+- [ ] File diagnostics use `VpHubPluginFileLog` → `%LocalAppData%\VP-Hub\logs\{productCode}.log` (not a custom folder).
 
 ## Tests / smoke
 
 - [ ] Manual smoke: agent running + signed in → allow path; agent off → safe deny.
 - [ ] Revit 2024 on a clean VM (no SDK): add-in loads; `canRun` appears in agent named-pipe log.
+- [ ] Plugin log appears under `%LocalAppData%\VP-Hub\logs\`; Export diagnostics ZIP includes `logs\*.log`.
+- [ ] If IPC or contract changed, note compatibility with **minimum agent version** in PR text.
+
+## Tests / smoke
+
+- [ ] Manual smoke: agent running + signed in → allow path; agent off → safe deny.
+- [ ] Revit 2024 on a clean VM (no SDK): add-in loads; `canRun` appears in agent named-pipe log.
+- [ ] Plugin log appears under `%LocalAppData%\VP-Hub\logs\`; Export diagnostics ZIP includes `logs\*.log`.
 - [ ] If IPC or contract changed, note compatibility with **minimum agent version** in PR text.

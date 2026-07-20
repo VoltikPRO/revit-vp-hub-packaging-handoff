@@ -22,6 +22,7 @@ Authoritative detail: [`docs/AGENTS.md`](../../docs/AGENTS.md).
 - Enforce freshness: exact `RequestNonce`; timestamp echo within skew.
 - On IPC failure, `Allowed == false`, or verification failure: **deny** — no fallback allow.
 - Cache verified OK in memory (30–120 seconds typical).
+- Local diagnostics: `VpHubPluginFileLog` → `%LocalAppData%\VP-Hub\logs\{productCode}.log` (see `docs/logging-redaction-policy.md`).
 
 ## TFM / IPC matrix
 

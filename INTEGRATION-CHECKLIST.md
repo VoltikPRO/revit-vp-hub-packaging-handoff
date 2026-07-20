@@ -2,8 +2,6 @@
 
 Copy into PR descriptions when integrating VP-Hub licensing and packaging.
 
-**License Probe reference add-in:** `reference/LicenseProbe/` — phases B–D implemented; complete portal TODOs before release.
-
 ## Portal / identity
 
 - [ ] `ProductCode` matches publisher portal product **Code**
@@ -17,6 +15,11 @@ Copy into PR descriptions when integrating VP-Hub licensing and packaging.
 - [ ] Every licensed command uses the same gate (`EnsureLicensed` / `RevitLicenseCanRunReport`)
 - [ ] Gate does **not** trust `Allowed` without `RevitLicenseProofVerifier`
 - [ ] Nonce + timestamp echo checked
+
+## Diagnostics
+
+- [ ] File logs use `VpHubPluginFileLog` → `%LocalAppData%\VP-Hub\logs\{productCode}.log`
+- [ ] No secrets in file logs ([`docs/logging-redaction-policy.md`](docs/logging-redaction-policy.md))
 
 ## Packaging
 

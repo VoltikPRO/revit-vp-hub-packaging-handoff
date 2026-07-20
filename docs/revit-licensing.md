@@ -51,11 +51,11 @@ For each licensed entry point (typically each `IExternalCommand.Execute`):
 5. If `proof.Allowed == true`:
    - still deny execution unless `TryVerifyProof(...)` succeeds
 
-Reference template:
+Shared helpers (prefer these):
 
-- `revit/LicensingSystem.Revit.LicenseProbe/LicenseProbeLicenseMessage.cs` (delegates to the shared report builder)
-- `revit/LicensingSystem.Revit.Licensing/RevitLicenseCanRunReport.cs`
-- `revit/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`
+- `libs/LicensingSystem.Revit.Licensing/RevitLicenseCanRunReport.cs`
+- `libs/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`
+- `libs/LicensingSystem.Revit.Licensing/VpHubPluginFileLog.cs`
 
 ## Proof verification requirements
 
@@ -75,7 +75,7 @@ The add-in MUST verify all of:
   - optional: `AudienceServerId` must match pinned expected audience (if set)
 - **Signature validity**
   - Verify ES256 (ECDSA P-256 + SHA-256) over canonical payload bytes
-  - `Grant.SignatureBase64` may be **either** ASN.1 DER (typical for many .NET signers) **or** raw 64-byte R||S (Web Crypto / browser signing). Add-ins must accept both so grants verified by the Worker are also accepted locally (see `worker-api/src/routes/admin/grantVerify.ts` and `revit/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`).
+  - `Grant.SignatureBase64` may be **either** ASN.1 DER (typical for many .NET signers) **or** raw 64-byte R||S (Web Crypto / browser signing). Add-ins must accept both so grants verified by the Worker are also accepted locally (see `libs/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`).
 
 ### Pinning strategy
 

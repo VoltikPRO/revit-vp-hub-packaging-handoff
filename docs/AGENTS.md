@@ -1,6 +1,6 @@
 ## Cursor / AI agent: Revit plugin licensing integration (must follow)
 
-This repository contains a licensing system for Windows desktop + Revit add-ins.
+This publisher kit contains the VP-Hub licensing SDK for Windows desktop + Revit add-ins.
 When editing any Revit add-in, treat this document as a strict implementation policy.
 
 ## Core architecture (non-negotiable)
@@ -11,14 +11,14 @@ When editing any Revit add-in, treat this document as a strict implementation po
 
 ## Source of truth (read first)
 
-- `revit/LicensingSystem.Revit.LicenseProbe/*` - reference implementation template
-- `revit/LicensingSystem.Revit.Licensing/*` - shared proof verification + canRun report (reuse in shipping add-ins)
-- `agent/src/LicensingSystem.Agent.Ipc/NamedPipeAgentClient.cs` - IPC client used by add-ins on **.NET 8** (Revit 2025+)
-- `agent/src/LicensingSystem.Agent.Ipc.Revit/NamedPipeAgentClient.cs` - same wire protocol for **Revit 2024** (.NET Framework 4.8)
-- `backend/src/LicensingSystem.Contracts/Agent/Grants/Grants.cs` - contracts (`CanRunProofDto`, grants)
-- `docs/architecture/revit-licensing.md` - detailed architecture and verification requirements
-- `docs/publishers/revit-add-in-onboarding.md` - publisher onboarding checklist (product, pinning, code, smoke tests)
-- `docs/brand/plugin-brand-book.md` - plugin messaging and UX conventions
+- `libs/LicensingSystem.Revit.Licensing/*` — shared proof verification, canRun report, `VpHubPluginFileLog`
+- `libs/LicensingSystem.Agent.Ipc/NamedPipeAgentClient.cs` — IPC client for **.NET 8** (Revit 2025+)
+- `libs/LicensingSystem.Agent.Ipc.Revit/NamedPipeAgentClient.cs` — same wire protocol for **Revit 2023–2024** (.NET Framework 4.8)
+- `libs/LicensingSystem.Contracts/Agent/Grants/Grants.cs` — contracts (`CanRunProofDto`, grants)
+- `docs/revit-licensing.md` — architecture and verification requirements
+- `docs/revit-add-in-onboarding.md` — publisher onboarding checklist
+- `docs/plugin-brand-book.md` — plugin messaging and UX conventions
+- `docs/logging-redaction-policy.md` — what may/must not be logged (incl. local file logs)
 
 ## Required command gating flow
 
@@ -56,6 +56,14 @@ Prefer a shared helper/SDK so all commands call a single `EnsureLicensed(...)` e
 
 If any verification step fails, treat the result as unlicensed and deny execution.
 
+## Local diagnostics (file logs)
+
+- Write under `%LocalAppData%\VP-Hub\logs\{productCode}.log` via `VpHubPluginFileLog` in `libs/LicensingSystem.Revit.Licensing`.
+- VP-Hub Agent **Export diagnostics** / **Report a problem** packs `logs\*.log` (agent builds with `DiagnosticsLogPackager`).
+- Do not invent another log directory; do not stream full file logs over IPC.
+- Optional cloud telemetry: `LogPluginEventAsync` (`run` / `success` / `fail`) — separate from the file log.
+- Follow `docs/logging-redaction-policy.md`.
+
 ## UX and runtime behavior rules
 
 - Agent unreachable: show a short actionable message ("Licensing agent is not running / not signed in").
@@ -86,11 +94,4 @@ Changes are not complete unless all of the following are true:
 
 ## Localization (EN + UK)
 
-All new **user-visible** copy must be bilingual. See [`docs/architecture/localization.md`](docs/architecture/localization.md).
-
-- **Web:** `ls_locale` → `data-locale`; `frontend/shared/i18n/`; API errors via `error.code` map (`api-error-copy.ts`)
-- **Agent WPF:** `Strings.en.resx` / `Strings.uk.resx`; Settings language override
-- **Revit UX:** culture-aware TaskDialog/report strings; `CanRunReasonMessages` with locale
-
-Do not translate technical identifiers (product codes, UUIDs, PEM). Terminology: entitlement → право на продукт; join key → код запрошення.
-
+User-facing Revit copy should be culture-aware where the brand book requires it. Do not translate technical identifiers (product codes, UUIDs, PEM).

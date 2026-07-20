@@ -87,6 +87,7 @@ $docMap = @{
     "docs/publishers/revit-pr-checklist.md"          = "docs/revit-pr-checklist.md"
     "docs/publishers/nuget.md"                       = "docs/nuget.md"
     "docs/publishers/lp-revit-plugin-net48-handoff.md" = "docs/lp-net48-overlay.md"
+    "docs/architecture/logging-redaction-policy.md"  = "docs/logging-redaction-policy.md"
     "shared/manifest.example.json"                   = "docs/manifest.example.json"
 }
 foreach ($entry in $docMap.GetEnumerator()) {

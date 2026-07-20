@@ -10,10 +10,9 @@ Canonical repo: [github.com/VoltikPRO/revit-vp-hub-packaging-handoff](https://gi
 |------|----------|
 | **AI skills** | `.cursor/skills/vp-hub-revit-integration` (start here), `revit-add-in-licensing`, `revit-vp-hub-packaging` |
 | **Policy** | `.cursor/rules/vp-hub-revit-licensing.mdc` |
-| **SDK** | `libs/` — Revit.Licensing, Contracts, Agent.Ipc* (or NuGet — [`docs/nuget.md`](docs/nuget.md)) |
-| **Reference** | `reference/LicenseProbe/` — read-only patterns |
+| **SDK** | `libs/` — Revit.Licensing (incl. `VpHubPluginFileLog`), Contracts, Agent.Ipc* (or NuGet — [`docs/nuget.md`](docs/nuget.md)) |
 | **Templates** | C# pinning/gate, `.addin`, `packaging/*.ps1` |
-| **Docs** | [`docs/AGENTS.md`](docs/AGENTS.md), onboarding, bundle packaging, brand book |
+| **Docs** | [`docs/AGENTS.md`](docs/AGENTS.md), onboarding, bundle packaging, brand book, logging policy |
 
 ## Quick start
 

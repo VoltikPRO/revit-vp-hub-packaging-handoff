@@ -17,8 +17,9 @@ Companion to `SKILL.md`. Docs: [`docs/revit-licensing.md`](../../../docs/revit-l
 ## Add-in code
 
 1. `ProjectReference` → `libs/LicensingSystem.Revit.Licensing/LicensingSystem.Revit.Licensing.csproj`
-2. net48: P-256 X/Y in sync with PEM (`reference/LicenseProbe/LicenseProbePinnedEcKey.cs`)
+2. net48: keep P-256 X/Y in sync with PEM when embedding `ECParameters`
 3. Gate every entry point; cache verified OK (~60s)
+4. File log: `VpHubPluginFileLog.Write(productCode, …)` → `%LocalAppData%\VP-Hub\logs\{productCode}.log`
 
 ### `pluginVersion` for canRun / logPluginEvent
 
@@ -39,6 +40,7 @@ From `docs/revit-add-in-onboarding.md` §4:
 2. Agent off — actionable deny message
 3. `Allowed == false` — map `Reason` (`libs/LicensingSystem.Contracts/Agent/CanRunReasonMessages.cs`)
 4. Wrong pins — verification fails, deny
+5. File log under `%LocalAppData%\VP-Hub\logs\{productCode}.log`; Export diagnostics includes `logs/*.log`
 
 ## net48 bundle overlay
 
@@ -49,3 +51,4 @@ See [`docs/lp-net48-overlay.md`](../../../docs/lp-net48-overlay.md).
 - PR checklist: [`docs/revit-pr-checklist.md`](../../../docs/revit-pr-checklist.md)
 - NuGet: [`docs/nuget.md`](../../../docs/nuget.md)
 - Bundle: [`docs/revit-bundle-packaging.md`](../../../docs/revit-bundle-packaging.md)
+- Logging: [`docs/logging-redaction-policy.md`](../../../docs/logging-redaction-policy.md)
