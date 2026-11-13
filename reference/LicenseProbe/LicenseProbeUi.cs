@@ -31,6 +31,18 @@ internal static class LicenseProbeUi
         "Shows brand, build/version, and agent connectivity summary (no secrets).",
         "Показує бренд, збірку/версію та зведення підключення agent (без секретів).");
 
+    public static string ReportProblemButtonLabel => Ui(
+        "Report a" + Environment.NewLine + "problem",
+        "Повідомити" + Environment.NewLine + "про проблему");
+
+    public static string ReportProblemToolTip => Ui(
+        "Send a problem report with logs to VP-Hub support in one click.",
+        "Надіслати звіт про проблему з журналами до підтримки VP-Hub одним кліком.");
+
+    public static string ReportProblemLongDescription => Ui(
+        "Sends this computer's VP-Hub logs and plugin logs, its name, and your account. No passwords or tokens.",
+        "Надсилає журнали VP-Hub і плагінів із цього комп'ютера, його назву та ваш обліковий запис. Без паролів і токенів.");
+
     public static string RibbonRegistrationFailed(string message) => Ui(
         $"Ribbon registration failed: {message}",
         $"Не вдалося зареєструвати стрічку: {message}");

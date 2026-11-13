@@ -54,8 +54,20 @@ public sealed class LicenseProbeApplication : IExternalApplication
             };
             panel.AddItem(aboutData);
 
+            var reportCmd = typeof(LicenseProbeReportProblemCommand).FullName ?? nameof(LicenseProbeReportProblemCommand);
+            var reportData = new PushButtonData(
+                nameof(LicenseProbeReportProblemCommand),
+                LicenseProbeUi.ReportProblemButtonLabel,
+                asm,
+                reportCmd)
+            {
+                ToolTip = LicenseProbeUi.ReportProblemToolTip,
+                LongDescription = LicenseProbeUi.ReportProblemLongDescription,
+            };
+            panel.AddItem(reportData);
+
             LicenseProbeFileLog.Write(
-                $"ExternalApplication.OnStartup: push buttons registered tab={TabName} panel={PanelName} commands={cmd}, {aboutCmd}");
+                $"ExternalApplication.OnStartup: push buttons registered tab={TabName} panel={PanelName} commands={cmd}, {aboutCmd}, {reportCmd}");
         }
         catch (Exception ex)
         {

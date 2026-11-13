@@ -105,6 +105,7 @@ Do **not** use the agent-unreachable summary for missing-assembly errors.
 - Plugin file logs belong in `%LocalAppData%\VP-Hub\logs\{productCode}.log` (`VpHubPluginFileLog`) so Report a problem / Export diagnostics include them with agent logs. Do not invent a separate log folder for support.
 - In **Developer mode**, Products shows a version picker so users can install any published version (including older). Superadmin sets package **Availability** to *All users* or *Advanced only* in Release index.
 - Provide a “Diagnostics export” path where appropriate (the agent already supports diagnostics export; plugins should point users to Report a problem / Products Update / Export diagnostics instead of reinventing).
+- A plugin's own **Report a problem** ribbon button sends the report in one click through `VpHubPluginProblemReport`; do not build another way to send logs.
 
 ## What AI agents must do
 

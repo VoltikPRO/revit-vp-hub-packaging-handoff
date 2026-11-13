@@ -14,6 +14,18 @@ public sealed record PublisherPublicKeyDto(
 /// <summary>
 /// Canonical payload that a publisher signs. Signature is stored separately.
 /// </summary>
+/// <param name="SchemaVersion">
+/// Canonical wire-format version — see <see cref="LicenseGrantPayloadCanonical"/> and
+/// docs/architecture/canrun-contract-versioning.md.
+///
+/// The default here is deliberately the fixed literal <c>1</c>, never "current version": this
+/// default is what <c>System.Text.Json</c> substitutes when deserializing a JSON payload that
+/// has no <c>schemaVersion</c> property at all — i.e. every grant issued before this field
+/// existed. Binding it to "current" instead would misclassify old, already-signed v1 grants as
+/// whatever the newest version becomes, and their signatures would stop verifying. Code that
+/// mints a *new* grant should pass <see cref="LicenseGrantPayloadCanonical.CurrentSchemaVersion"/>
+/// explicitly rather than rely on this default.
+/// </param>
 public sealed record LicenseGrantPayloadDto(
     Guid GrantId,
     Guid PublisherId,
@@ -25,7 +37,8 @@ public sealed record LicenseGrantPayloadDto(
     string Channel,
     string? AudienceServerId,
     DateTimeOffset IssuedAtUtc,
-    string Kid);
+    string Kid,
+    int SchemaVersion = 1);
 
 /// <summary>
 /// Signed license grant. Plugins should validate <see cref="SignatureBase64"/> over <see cref="Payload"/>.

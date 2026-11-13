@@ -18,6 +18,9 @@ public static class ReasonCodes
     public const string RunProofInvalid = "RUN_PROOF_INVALID";
     public const string ReplayDetected = "REPLAY_DETECTED";
     public const string TimestampOutOfRange = "TIMESTAMP_OUT_OF_RANGE";
+    public const string UnsupportedSchemaVersion = "UNSUPPORTED_SCHEMA_VERSION";
+    public const string TrialGrantConstraintViolated = "TRIAL_GRANT_CONSTRAINT_VIOLATED";
+    public const string StandaloneTrialUnavailable = "STANDALONE_TRIAL_UNAVAILABLE";
 
     // Transitional aliases (backward compatibility)
     public const string OfflineExpiredAlias = "OFFLINE_EXPIRED";
@@ -37,6 +40,9 @@ public static class ReasonCodes
         RunProofInvalid,
         ReplayDetected,
         TimestampOutOfRange,
+        UnsupportedSchemaVersion,
+        TrialGrantConstraintViolated,
+        StandaloneTrialUnavailable,
     ];
 
     /// <summary>
@@ -45,7 +51,7 @@ public static class ReasonCodes
     /// </summary>
     public static string Normalize(string? reason)
     {
-        var r = string.IsNullOrWhiteSpace(reason) ? string.Empty : reason.Trim();
+        var r = string.IsNullOrWhiteSpace(reason) ? string.Empty : reason!.Trim();
         if (r.Length == 0)
             return r;
 
