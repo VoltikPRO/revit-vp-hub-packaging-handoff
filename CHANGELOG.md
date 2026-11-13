@@ -1,5 +1,21 @@
 ﻿# Changelog
 
+## 1.0.13 — 2026-11-14
+
+- **Fix (UI freeze):** net8 `NamedPipeAgentClient` uses a 3 s connect timeout (`FastFailConnectTimeoutMs`) for `CanRunAsync` and problem reports — no more 60 s Revit UI freeze when the VP-Hub agent is not installed.
+- **IPC JSON:** `IpcJsonCodec` (STJ first, Newtonsoft fallback) in both `Agent.Ipc` and `Agent.Ipc.Revit`; slim `Agent.Ipc` now references `Newtonsoft.Json` 13.0.3.
+- **New:** `VpHubPluginProblemReport` (one-click problem report), `VpHubPluginFeedback`, `VpHubStandaloneTrialState` (offline trial), `PluginReportStatus`; LicenseProbe gains a *Report a problem* command.
+- **Licensing:** pinned trial key with hard caps (`TrialGrantMaxSeatLimit` = 5, `TrialGrantMaxValidityDays` = 14); net48 target compiles again.
+- Slim net8 client template (`templates/vendored/NamedPipeAgentClient.net8.cs`) rebuilt from upstream plugin-facing methods.
+- Docs refreshed: onboarding, PR checklist, revit-licensing, AGENTS, brand book, LP net48 overlay.
+
+## SDK sync 2026-11-14
+
+- Source: LicensingSystem (platform-seo-ads-2026.07.22-157-g7f812b3)
+- libs: Revit.Licensing, Contracts, Agent.Ipc, Agent.Ipc.Revit
+- reference: LicenseProbe
+- docs: publisher-facing copies
+
 ## 1.0.12 — 2026-07-21
 
 - **Diagnostics:** ship `VpHubPluginFileLog` in `libs/LicensingSystem.Revit.Licensing` — write to `%LocalAppData%\VP-Hub\logs\{productCode}.log` so VP-Hub Agent Export diagnostics / Report a problem can pack plugin traces (agent builds with `DiagnosticsLogPackager`).

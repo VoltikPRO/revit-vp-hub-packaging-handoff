@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using LicensingSystem.Contracts.Agent.Grants;
@@ -89,6 +90,18 @@ public static class RevitLicenseProofVerifier
         }
 
         var payload = proof.Grant.Payload;
+
+        // Explicit check ahead of the crypto path: an unrecognized schema version would also
+        // fail signature verification (LicenseGrantPayloadCanonical throws for unknown versions),
+        // but a dedicated reason code here gives support a clear "update the plugin/agent" signal
+        // instead of a generic "signature invalid".
+        if (!LicenseGrantPayloadCanonical.KnownSchemaVersions.Contains(payload.SchemaVersion))
+        {
+            error = $"Unsupported grant schema version {payload.SchemaVersion}.";
+            reasonCode = ReasonCodes.UnsupportedSchemaVersion;
+            return false;
+        }
+
         if (payload.ValidFromUtc > now)
         {
             error = "Grant not yet valid.";
@@ -103,28 +116,150 @@ public static class RevitLicenseProofVerifier
             return false;
         }
 
-        if (!TryVerifyPublisherPinned(proof.PublisherKey, payload, pinning, out error))
+        if (!TryVerifyPublisherPinned(proof.PublisherKey, payload, pinning, out error, out var isTrialKey))
         {
             reasonCode = ReasonCodes.RunProofInvalid;
             return false;
         }
 
-        if (!TryVerifySignedGrantSignature(proof.Grant, pinning.ProductCode, pinning, out error))
+        if (!TryVerifySignedGrantSignature(proof.Grant, pinning.ProductCode, pinning, isTrialKey, out error))
         {
             reasonCode = ReasonCodes.SignatureInvalid;
+            return false;
+        }
+
+        // Hard caps on anything signed by the trial key, enforced here regardless of what the
+        // payload itself claims — this is what bounds a compromised trial key to a small number
+        // of short-lived free seats instead of an arbitrary license. Checked after signature
+        // verification so these fields are known-authentic (actually signed), not attacker-supplied.
+        if (isTrialKey && !TryVerifyTrialGrantConstraints(payload, out error))
+        {
+            reasonCode = ReasonCodes.TrialGrantConstraintViolated;
             return false;
         }
 
         return true;
     }
 
+    /// <summary>
+    /// Verifies a standalone (offline, no-agent) trial grant embedded with the plugin package —
+    /// see docs/architecture/canrun-contract-versioning.md §1c. There is no live IPC round-trip
+    /// for an embedded artifact, so nonce/timestamp freshness (which exists to catch a replayed
+    /// or stale *response*) does not apply here the way it does in <see cref="TryVerifyProof"/>;
+    /// what replaces it is that this path only ever accepts a grant signed by the pinned *trial*
+    /// key. A grant signed by the production key is refused here even if otherwise perfectly
+    /// valid — production licensing must always go through the agent, never this path. Callers
+    /// are still responsible for the two checks that cannot live in a pure verification function:
+    /// "has the agent ever successfully licensed this product on this machine" (if so, standalone
+    /// trial must be permanently refused, before ever calling this) and the local first-use
+    /// trial-window tracking (see the caller-side state helper referenced in the architecture
+    /// doc) — this method only checks what the signed bytes themselves can prove.
+    /// </summary>
+    public static bool TryVerifyStandaloneTrialGrant(
+        SignedLicenseGrantDto grant,
+        PublisherPublicKeyDto publisherKey,
+        RevitLicensePinning pinning,
+        out string? error,
+        out string? reasonCode)
+    {
+        error = null;
+        reasonCode = null;
+
+        var now = DateTimeOffset.UtcNow;
+        if (publisherKey.RevokedAtUtc is { } revokedAt && revokedAt <= now)
+        {
+            error = "Publisher key is revoked.";
+            reasonCode = ReasonCodes.RunProofInvalid;
+            return false;
+        }
+
+        var payload = grant.Payload;
+
+        if (!LicenseGrantPayloadCanonical.KnownSchemaVersions.Contains(payload.SchemaVersion))
+        {
+            error = $"Unsupported grant schema version {payload.SchemaVersion}.";
+            reasonCode = ReasonCodes.UnsupportedSchemaVersion;
+            return false;
+        }
+
+        if (payload.ValidFromUtc > now)
+        {
+            error = "Grant not yet valid.";
+            reasonCode = ReasonCodes.RunProofInvalid;
+            return false;
+        }
+
+        if (payload.ValidUntilUtc is { } until && until <= now)
+        {
+            error = "Grant expired.";
+            reasonCode = ReasonCodes.RunProofInvalid;
+            return false;
+        }
+
+        if (!TryVerifyPublisherPinned(publisherKey, payload, pinning, out error, out var isTrialKey))
+        {
+            reasonCode = ReasonCodes.RunProofInvalid;
+            return false;
+        }
+
+        if (!isTrialKey)
+        {
+            error = "Standalone trial grants must be signed by the pinned trial key, not the production key.";
+            reasonCode = ReasonCodes.StandaloneTrialUnavailable;
+            return false;
+        }
+
+        if (!TryVerifySignedGrantSignature(grant, pinning.ProductCode, pinning, isTrialKey: true, out error))
+        {
+            reasonCode = ReasonCodes.SignatureInvalid;
+            return false;
+        }
+
+        if (!TryVerifyTrialGrantConstraints(payload, out error))
+        {
+            reasonCode = ReasonCodes.TrialGrantConstraintViolated;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryVerifyTrialGrantConstraints(LicenseGrantPayloadDto payload, out string? error)
+    {
+        error = null;
+
+        if (payload.SeatLimit > SecurityConstants.TrialGrantMaxSeatLimit)
+        {
+            error = $"Trial grant seat limit {payload.SeatLimit} exceeds the maximum of {SecurityConstants.TrialGrantMaxSeatLimit}.";
+            return false;
+        }
+
+        if (payload.ValidUntilUtc is not { } until)
+        {
+            error = "Trial grant must have a validUntilUtc (open-ended trials are not allowed).";
+            return false;
+        }
+
+        var validityDays = (until - payload.ValidFromUtc).TotalDays;
+        if (validityDays > SecurityConstants.TrialGrantMaxValidityDays)
+        {
+            error = $"Trial grant validity of {validityDays:F1} days exceeds the maximum of {SecurityConstants.TrialGrantMaxValidityDays} days.";
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <param name="isTrialKey">True when the response's key matched the pinned *trial* key rather than the production key.</param>
     private static bool TryVerifyPublisherPinned(
         PublisherPublicKeyDto key,
         LicenseGrantPayloadDto payload,
         RevitLicensePinning pinning,
-        out string? error)
+        out string? error,
+        out bool isTrialKey)
     {
         error = null;
+        isTrialKey = false;
 
         if (!Guid.TryParse(pinning.ExpectedPublisherId, out var expectedPublisherId) || expectedPublisherId == Guid.Empty
             || string.IsNullOrWhiteSpace(pinning.ExpectedKid)
@@ -140,14 +275,27 @@ public static class RevitLicenseProofVerifier
             return false;
         }
 
-        if (!string.Equals(key.Kid, pinning.ExpectedKid, StringComparison.Ordinal))
+        // A response key must match exactly one pinned kid — production, or trial if one is
+        // pinned. Matching neither is untrusted; the two pinned kids are guaranteed distinct by
+        // RevitLicensePinning's constructor, so this is never ambiguous.
+        var responsePem = NormalizePemWhitespace(key.PublicKeyPem);
+        string pinnedPem;
+        if (string.Equals(key.Kid, pinning.ExpectedKid, StringComparison.Ordinal))
+        {
+            pinnedPem = NormalizePemWhitespace(pinning.ExpectedPublisherPublicKeyPem);
+            isTrialKey = false;
+        }
+        else if (pinning.ExpectedTrialKid is { } trialKid && string.Equals(key.Kid, trialKid, StringComparison.Ordinal))
+        {
+            pinnedPem = NormalizePemWhitespace(pinning.ExpectedTrialPublisherPublicKeyPem!);
+            isTrialKey = true;
+        }
+        else
         {
             error = "Kid not trusted.";
             return false;
         }
 
-        var responsePem = NormalizePemWhitespace(key.PublicKeyPem);
-        var pinnedPem = NormalizePemWhitespace(pinning.ExpectedPublisherPublicKeyPem);
         if (!string.Equals(responsePem, pinnedPem, StringComparison.Ordinal))
         {
             error = "Publisher public key does not match pinned key.";
@@ -176,6 +324,7 @@ public static class RevitLicenseProofVerifier
         SignedLicenseGrantDto signed,
         string expectedProductCode,
         RevitLicensePinning pinning,
+        bool isTrialKey,
         out string? error)
     {
         error = null;
@@ -195,7 +344,11 @@ public static class RevitLicenseProofVerifier
             var data = LicenseGrantPayloadCanonical.ToUtf8Bytes(signed.Payload);
             using var ecdsa = ECDsa.Create();
             // PEM already matched pinned text — use embedded P-256 point (avoids PEM APIs on net48).
-            ecdsa.ImportParameters(pinning.P256PublicKeyParameters);
+            var keyParameters = isTrialKey
+                ? pinning.TrialP256PublicKeyParameters
+                    ?? throw new InvalidOperationException("Trial key matched but no trial ECParameters pinned.")
+                : pinning.P256PublicKeyParameters;
+            ecdsa.ImportParameters(keyParameters);
             // Match worker-api grantVerify: WebCrypto ES256 is raw R||S (64 bytes); many .NET tools emit ASN.1 DER.
             if (!TryVerifyEs256Signature(ecdsa, data, sig, out var verifyError))
             {

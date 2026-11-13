@@ -121,6 +121,8 @@ $ipcXml = @'
   </ItemGroup>
 
   <ItemGroup>
+    <!-- IpcJsonCodec falls back to Newtonsoft when another add-in's STJ wins the AppDomain. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IO.Pipes.AccessControl" Version="6.0.0-preview.5.21301.5" />
   </ItemGroup>
 

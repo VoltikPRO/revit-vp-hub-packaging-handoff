@@ -51,11 +51,11 @@ For each licensed entry point (typically each `IExternalCommand.Execute`):
 5. If `proof.Allowed == true`:
    - still deny execution unless `TryVerifyProof(...)` succeeds
 
-Shared helpers (prefer these):
+Shared helpers (prefer these over copying add-in samples):
 
-- `libs/LicensingSystem.Revit.Licensing/RevitLicenseCanRunReport.cs`
-- `libs/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`
-- `libs/LicensingSystem.Revit.Licensing/VpHubPluginFileLog.cs`
+- `revit/LicensingSystem.Revit.Licensing/RevitLicenseCanRunReport.cs`
+- `revit/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`
+- `revit/LicensingSystem.Revit.Licensing/VpHubPluginFileLog.cs`
 
 ## Proof verification requirements
 
@@ -75,7 +75,7 @@ The add-in MUST verify all of:
   - optional: `AudienceServerId` must match pinned expected audience (if set)
 - **Signature validity**
   - Verify ES256 (ECDSA P-256 + SHA-256) over canonical payload bytes
-  - `Grant.SignatureBase64` may be **either** ASN.1 DER (typical for many .NET signers) **or** raw 64-byte R||S (Web Crypto / browser signing). Add-ins must accept both so grants verified by the Worker are also accepted locally (see `libs/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`).
+  - `Grant.SignatureBase64` may be **either** ASN.1 DER (typical for many .NET signers) **or** raw 64-byte R||S (Web Crypto / browser signing). Add-ins must accept both so grants verified by the Worker are also accepted locally (see `worker-api/src/routes/admin/grantVerify.ts` and `revit/LicensingSystem.Revit.Licensing/RevitLicenseProofVerifier.cs`).
 
 ### Pinning strategy
 
@@ -124,6 +124,27 @@ Treat as **not licensed** and show:
 - Cache “verified OK” results in memory for 30–120 seconds.
 - Avoid making multiple IPC calls per command; do one check at command start.
 - Do not perform network calls in the add-in.
+
+## Optional: in-product feedback
+
+`LicensingSystem.Revit.Licensing.VpHubPluginFeedback` submits a thumbs up/down + optional
+comment for a command over the same IPC channel as `logPluginEvent` (`SubmitPluginFeedbackAsync`
+on `NamedPipeAgentClient`, both TFM variants) — never a direct network call from the add-in.
+
+Rules for any add-in that shows a feedback prompt:
+
+- Call `ShouldPrompt(productCode)` before showing UI; it reads local throttling state only
+  (no IPC), defaulting to at most once every 20 successful runs, and never again once a
+  comment has been recorded.
+- Call `RecordSuccessfulRun(productCode)` after every successful licensed command, regardless
+  of whether a prompt was shown.
+- `SubmitAsync` must never block command completion — treat it as fire-and-forget with its own
+  timeout. A feedback submission failing must never be visible to the user as the licensed
+  command failing.
+
+Free-text comments are redaction-sensitive (see
+[`logging-redaction-policy.md`](logging-redaction-policy.md)) — an engineer may reference a
+project name in passing.
 
 ## Recommended packaging / reuse (SDK)
 

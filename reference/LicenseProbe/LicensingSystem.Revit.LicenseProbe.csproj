@@ -37,6 +37,7 @@
     <Compile Remove="LicenseProbeApplication.cs" />
     <Compile Remove="LicenseProbeCommand.cs" />
     <Compile Remove="LicenseProbeAboutCommand.cs" />
+    <Compile Remove="LicenseProbeReportProblemCommand.cs" />
   </ItemGroup>
 
   <ItemGroup>

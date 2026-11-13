@@ -25,9 +25,17 @@ Do **not** pass `byte[]` / `ReadOnlySpan<byte>` (binds to an API missing on olde
 
 **Smoke:** Revit 2024 + LP + another STJ-using add-in if available — command must reach the agent (or show the dependency message). Confirm `Contents/2023` and `Contents/2024` still ship `System.Text.Json.dll` + `LicensingSystem.Agent.Ipc.Revit.dll`.
 
-## Status (2026-07)
+## Status (2026-07, confirmed 2026-08-01)
 
 Multi-year VP-Hub packaging is **implemented** in `lp-revit-plugin` (`packaging/Build-LPApplicationPackage.ps1`): TFMs **net48** (2023–2024), **net8.0-windows** (2025–2026); bundle `LightningProtection.Revit.bundle`. Keep the net48 self-contained DLL checklist below — do not regress to “main DLL only”.
+
+**Confirmed with a real build, not just a code review (2026-08-01):** ran
+`packaging/Build-LPApplicationPackage.ps1` with no flags (production mode, all 4 years required)
+against actually-installed Revit 2023–2026. All four years built with 0 errors; `deploy/2023` and
+`deploy/2024` (net48) each got 15 DLLs (`Test-RevitApplicationPackage.ps1`'s minimum is 9), and
+the package gate reported `Package validation OK`. The previously-red CI issue this doc exists to
+track is fixed. Still open: an actual clean-VM install + first Revit run (no dev tooling), which
+this local build does not substitute for.
 
 Publisher kit consumers: refresh `libs/` from [revit-vp-hub-packaging-handoff](https://github.com/VoltikPRO/revit-vp-hub-packaging-handoff) **≥ 1.0.11** (or re-run `scripts/sync-from-licensingsystem.ps1` / `adopt-into-project.ps1`) so `Agent.Ipc.Revit` includes the string-Deserialize fix.
 

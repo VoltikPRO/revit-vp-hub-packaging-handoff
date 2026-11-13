@@ -282,7 +282,7 @@ public static class RevitLicenseCanRunReport
 
         if (ex is TimeoutException
             || ex.InnerException is TimeoutException
-            || ex.Message.Contains("timed out", StringComparison.OrdinalIgnoreCase))
+            || ex.Message.IndexOf("timed out", StringComparison.OrdinalIgnoreCase) >= 0)
         {
             return Ui(
                 locale,
@@ -319,9 +319,9 @@ public static class RevitLicenseCanRunReport
             if (cur is FileNotFoundException or FileLoadException)
             {
                 var name = cur.Message;
-                if (name.Contains("System.Text.Json", StringComparison.OrdinalIgnoreCase)
-                    || name.Contains("LicensingSystem.Agent.Ipc", StringComparison.OrdinalIgnoreCase)
-                    || name.Contains("LicensingSystem.Contracts", StringComparison.OrdinalIgnoreCase))
+                if (name.IndexOf("System.Text.Json", StringComparison.OrdinalIgnoreCase) >= 0
+                    || name.IndexOf("LicensingSystem.Agent.Ipc", StringComparison.OrdinalIgnoreCase) >= 0
+                    || name.IndexOf("LicensingSystem.Contracts", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     return true;
                 }
